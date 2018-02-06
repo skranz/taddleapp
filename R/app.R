@@ -13,8 +13,22 @@ taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), ...) {
   glob$taddle.dir = taddle.dir
   glob$db.dir = db.dir
 
+  methods.file = system.file("methods/methods.rmd", package="taddleapp")
+  methods = rmdtools::read.yaml(methods.file)
+  glob$methods = lapply(methods, function(m) {
+    m$descr = md2html(m$descr)
+    m
+  })
+
+
+  txt = read.as.utf8(methods.file)
+  yaml  =  parse.hashdot.yaml(txt)
+
   css.file = system.file("www/taddle.css", package="taddleapp")
+
+
   app$ui = fluidPage(theme=shinytheme("cerulean"),
+    mathjaxHeader(),
     includeCSS(css.file),
     fluidRow(column(offset=1, width=10,
       h3("Taddle: Easily Allocate Seminar Topics"),
@@ -57,7 +71,7 @@ show.home.ui = function(..., app=getApp(), glob=app$glob) {
 }
 
 empty.tat = function(...) {
-  as.environment(list(new=TRUE, key = random.string(), topic.text="Example Topic 1\nExample Topic 2\nExample Topic 3", topics=character(0), num.topics=0))
+  as.environment(list(new=TRUE, key = random.string(), topic.text="Example Topic 1\nExample Topic 2\nExample Topic 3", topics=character(0), num.topics=0, method="serialdict"))
 }
 
 show.new.alloc = function(...) {
@@ -94,12 +108,28 @@ show.new.alloc1 = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
 
 show.new.alloc2 = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
   restore.point("show.new.alloc2")
+
+  choices = names(glob$methods)
+  names(choices) = sapply(glob$methods, function(m) m$title)
+
+
   ui = tagList(
-    h3("Step 2: Allocation Method"),
-    selectInput("allocMethod", "Allocation Method"),
+    h3("Step 2: Allocation Mechanism"),
+    selectInput("allocMethod", "Allocation Mechanism",choices),
+    uiOutput("allocDescr"),
     simpleButton("back2Btn","Back"),
     simpleButton("cont2Btn","Continue", form.ids = c("titleInput","topicsInput"))
   )
+
+  selectChangeHandler("allocMethod", function(value,...){
+    restore.point("allocMethodChange")
+    tat$method = value
+    m = glob$methods[[tat$method]]
+    setUI("allocDescr",withMathJaxNoHeader(HTML(m$descr)))
+  })
+
+  m = glob$methods[[tat$method]]
+  setUI("allocDescr",withMathJaxNoHeader(HTML(m$descr)))
 
   buttonHandler("back2Btn", function(formValues, ...,tat=app$tat, app=getApp()) {
     restore.point("back2Btn")

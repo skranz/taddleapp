@@ -1,34 +1,42 @@
-#. serialdict
-##. label
-Random Serial Dictatorship
-##. desc
-A classic and simple incentive compatible algorithm. Students order all topics according to their preferences.
+serialdict:
+  title: |
+    Truthful Revelation: Random Serial Dictatorship
+  descr: |
+    Random serial dictatorship is a simple mechanism that probably comes first to mind to most microeconomists. 
+    
+    1. Each Student orders all topics from most preferred to least preferred.
+    2. Then the algorithm moves through all students in a purely random order. Each student gets her most preferred topic from the set of all topics that have not yet been given to a student earlier.
 
-Students choose their topics in order of randomly given priorities. Each student picks her most favorite topic from all topics that have not yet been taken by a student with higher priority. 
+costmin_lin:
+  title: Cost Minimization (linear)
+  descr: |
+    Cost minimization mechanisms may appear most natural to the operations research community.
+    
+    1. Each Student orders all topics from most preferred to least preferred.
+    
+    2. If a student $i$ is assigned a topic $t$, she ranks at position $p_{it}$, we assign to this match a cost of $c_{it}=p_{it}$. The algorithm finds that allocation that minimizes the sum of costs over all students.
 
-### Advantages:
-  - It is incentive compatible for students to rank topics according to their true preferences. Students don't have to strategize.
-  - Easy to explain and to understand.
+costmin_quad:
+  title: Cost Minimization (quadratic)
+  descr: |
+    
+    Compared to costs that are linear in the position, quadratic costs put a stronger penalty on assignments where some students get very low ranked topics. So more "equal" assignments are preferred.
+    
+    Otherwise the mechanism is the same:
+    
+    1. Students again submit their preferences over topics.
+    
+    2. If a student \(i\) is assigned a topic \(t\), she ranks at position \(p_{it}\), we assign to this match a cost of \(c_{it}=p_{it}^2\). The algorithm finds that allocation that minimizes the sum of costs over all students.
 
-### Disadvantages:
-  - There is no way for students to express their cardinal preferences. Outcomes can be dominated by algorithms that allow to strategize but allow more effective risk allocation among students.
-  - Students have to rank all seminars.
 
-#. serialdict_safe
-##. label
-Serial Dictatorship or 
-##. desc
-A simple incentive compatible algorithm. Students order all topics according to their preferences.
 
-Students choose their topics in order of randomly given priorities. Each student picks her most favorite topic from all topics that have not yet been taken by a student with higher priority. 
-
-### Advantages:
-  - It is incentive compatible for students to rank topics according to their true preferences. Students don't have to strategize.
-  - Easy to explain and to understand.
-
-### Disadvantages:
-  - There is no way for students to express their cardinal preferences. Outcomes can be dominated by algorithms that allow to strategize but allow more effective risk allocation among students.
-  - Students have to rank all seminars.
-
-#. assign
-##. title Optimal Assignment (OR)
+costmin_cubic:
+  title: Cost Minimization (cubic)
+  descr: |
+    With cubic costs one avoids even more allocations in which some students get a very low ranked topic than with quadratic costs. 
+    
+    Otherwise the mechanism is the same:
+    
+    1. Students again submit their preferences over topics.
+    
+    2. If a student $i$ is assigned a topic $t$, she ranks at position $p_{it}$, we assign to this match a cost of $c_{it}=p_{it}^3$. The algorithm finds that allocation that minimizes the sum of costs over all students.
