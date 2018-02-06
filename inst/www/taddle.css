@@ -1,0 +1,14 @@
+.home-outer {
+  width: 100%;
+  text-align: center;
+}
+
+.home-inner {
+  display: inline-block;
+}
+
+#new-alloc-1 textarea {
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: scroll;
+}

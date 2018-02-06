@@ -1,0 +1,79 @@
+---
+title: "Allocation Mechanisms"
+output: 
+  html_document: 
+    toc: yes
+---
+
+## 1. Truthful Revelation by Random Serial Dictatorship Mechanism
+
+Random serial dictatorship is a simple mechanism that probably comes first to mind to most microeconomists:
+
+1. Each Student orders all topics from most preferred to least preferred.
+2. Then the algorithm moves through all students in a purely random order. Each student gets her most preferred topic from the set of all topics that have not yet been given to a student earlier.
+
+### The Advantages
+With this algorithm, it is in the best interest for each student to order all topics according to her true preferences. It relieves students from all worries about strategizing: just state the truth.
+
+Furthermore this mechanism leads to an ex-post Pareto-optimal allocation of topics. This means after topics are assigned, there are no more trades that could make some student strictly better off and no student worse off.
+
+### Drawbacks
+However, the random serial dictatorship may not be optimal if we assign numeric welfare levels to different allocations or if we account for ex-ante risk preferences of participants.
+
+We will illustrate these drawbacks with examples further below.
+
+
+## 2. Minimizing Total Cost by Solving the Linear Assignment Problem: 
+
+The following cost minimization mechanism may appear most natural to the operations research community.
+
+1. Students again submit their preferences over topics.
+2. We assign a cost to every allocated student-topic pair. Natural choices would be that the cost is the position at which the student has ranked the topic or the square of that position.
+3. We now find that allocation that minimizes the sum of costs over all students.
+
+The minimization problem in step 3 is a classic optimization problem, known as the `Assignment Problem` and can for example be solved in polynomial time by the [Hungarian Algorithm](https://en.wikipedia.org/wiki/Hungarian_algorithm).
+
+To see why this mechanism may be preferable to random serial dictatorship, consider the following example with three students that truthfully state their preferences over three topics.
+
+| costs | A | B | C |
+|-------|---|---|---|
+| Anna  | 1 | 2 | 3 |
+| Bob   | 1 | 2 | 3 |
+| Carla | 1 | 3 | 2 |
+
+
+Anna and Bob share the preference ordering `A, B, C` over the three topics. Carla's preferences `A, C, B` just differ by prefering C over B. The table shows the cost for each student-topic match. Here, the decision maker specified that the cost of a match is equal to the position of the topic in the student's ranking.
+
+If we want to minimize the total cost, it is optimal to always give topic C to Carla and give topics A and B to Anna and Bob. Total cost would then be $$1.5+1.5+2=5$$
+
+In contrast, with the random serial dictatorship Carla also gets topic A with probability 1/3, in which case Anna or Bob get their least desired topic C.  Expected total cost would then be higher:
+$$\frac{1}{3}((1+2+2.5)+(1+2+2.5)+(1+2+2)) \approx 5,33$$
+
+Does this mean that is always optimal to use the cost minimization mechanism if want to minimize a specific cost function? Not neccessarily.
+
+Assume that Carla actually prefers a lottery in which she gets A, C and B each with probability 1/3 than getting her second choice C for sure. Then in the cost-minimization mechanism Carla would benefit from misrepresenting her preferences in our example and state the preference order 'A,B,C'. Since then all students stated the same preferences, the cost minimization mechanism cannot do better than to assign each topic to each student with probability 1/3. Expected cost under the misrepresented preferences would then be $$2+2+2=6.$$ We would then have a worse outcome than under random serial dictatorship where it is optimal to state preferences truthfully.
+
+So which mechanism is better? There is no clear answer. It depends.
+
+## 3. Accounting for Risk Preferences: The Star Range Mechanism
+
+Neither of the two mechanisms above are designed to account for students' risk preferences. Consider an example, in which all three students rank the topics in the same order: `A, B, C`, yet differ by the strength of their preferences. The following table shows their von Neumann-Morgenstern (cardinal) utilities:
+
+| utility | A | B   | C |
+|---------|---|-----|---|
+| Anna    | 1 | 0.1 | 0 |
+| Bob     | 1 | 0.9 | 0 |
+| Carla   | 1 | 0.1 | 0 |
+
+Anna and Carla really like alternative A, while B is not much better than C. Yet, for Bob A and B are almost equally good. If Bob could get B for sure, he would strongly prefer it over a lottery where he gets A and C with 50% each. For Anna and Carla it is the other way round.
+
+Random serial dictatorship or our cost minimization mechanism (assuming truthfully reported preference orderings), would not account for these differences in cardinal utility, but assign each topic with equal probability to each student.
+
+If one requests all students to state their cardinal utilties for all topics, one could use a very nice algorithm by Hylland and Zeckhauser (1979) that simulates a competitive market in which students trade probabilties of getting specific topics. Yet, it may be relatively time consuming and difficult for students to state their cardinal utility over a list of say 16 different seminar topics. (Another hurddle is that one needs to implement an efficient algorithm to compute equilibrium prices, which was not completely resolved by Hylland and Zeckhauser.)
+
+We included a simpler, yet less powerful, mechanism, which we call the star range mechanism. 
+
+
+# References
+
+Hylland, A., & Zeckhauser, R. (1979). The Efficient Allocation of Individuals to Positions. Journal of Political Economy, 87(2), 293-314.
