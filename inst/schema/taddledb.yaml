@@ -1,0 +1,37 @@
+# dbmisc::dbCreateSQLiteFromSchema(system.file("schema/taddledb.yaml", package="taddleapp"),db.name = "taddledb.sqlite",db.dir = "D:/libraries/taddle/shared/db")
+
+tat:
+  table:
+    tatid: CHARACTER(20)
+    rankkey: CHARACTER(20)
+    title: VARCHAR(200)
+    email: VARCHAR(50)
+    agree: BOOLEAN
+    org_method: CHARACTER(10)
+    method: CHARACTER(10)
+    topictext: TEXT
+    deadline: DATETIME
+    create_time: DATETIME
+
+topic:
+  table:
+    tatid: CHARACTER(20)
+    pos: INTEGER
+    topic: TEXT
+
+student:
+  table:
+    tatid: CHARACTER(20)
+    studkey: CHARACTER(20)
+    studemail: VARCHAR(50)
+    studname: VARCHAR(30)
+    first_rank: DATETIME
+    last_rank: DATETIME
+
+ranking:
+  table:
+    tatid: CHARACTER(20)
+    studemail: VARCHAR(50)
+    pos: INTEGER
+    shownpos: INTEGER
+    rank: INTEGER

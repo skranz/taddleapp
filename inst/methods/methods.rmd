@@ -1,30 +1,35 @@
+no:
+  title: |
+    Choose allocation method after deadline
+  descr: |
+    Let students rank all topics until the deadline. After the deadline, you can compare the results for different allocation methods and pick one method.
+
+
 serialdict:
   title: |
     Truthful Revelation: Random Serial Dictatorship
   descr: |
     Random serial dictatorship is a simple mechanism that probably comes first to mind to most microeconomists. 
     
-    1. Each Student orders all topics from most preferred to least preferred.
-    2. Then the algorithm moves through all students in a purely random order. Each student gets her most preferred topic from the set of all topics that have not yet been given to a student earlier.
+    1. Each Student ranks all topics
+    2. The algorithm moves through all students in a purely random order. Each student gets her most preferred topic from the set of all topics that have not yet been given to a student earlier.
 
 costmin_lin:
   title: Cost Minimization (linear)
   descr: |
     Cost minimization mechanisms may appear most natural to the operations research community.
     
-    1. Each Student orders all topics from most preferred to least preferred.
-    
+    1. Each Student ranks all topics    
     2. If a student $i$ is assigned a topic $t$, she ranks at position $p_{it}$, we assign to this match a cost of $c_{it}=p_{it}$. The algorithm finds that allocation that minimizes the sum of costs over all students.
 
 costmin_quad:
   title: Cost Minimization (quadratic)
   descr: |
+    Cost minimization mechanisms may appear most natural to the operations research community.
     
-    Compared to costs that are linear in the position, quadratic costs put a stronger penalty on assignments where some students get very low ranked topics. So more "equal" assignments are preferred.
+    Compared to costs that are linear in the position, quadratic costs put a stronger penalty on assignments where some students get very low ranked topics. So more "equal" assignments are preferred. Otherwise the mechanism is the same:
     
-    Otherwise the mechanism is the same:
-    
-    1. Students again submit their preferences over topics.
+    1. Each Student ranks all topics    
     
     2. If a student \(i\) is assigned a topic \(t\), she ranks at position \(p_{it}\), we assign to this match a cost of \(c_{it}=p_{it}^2\). The algorithm finds that allocation that minimizes the sum of costs over all students.
 
@@ -33,10 +38,10 @@ costmin_quad:
 costmin_cubic:
   title: Cost Minimization (cubic)
   descr: |
-    With cubic costs one avoids even more allocations in which some students get a very low ranked topic than with quadratic costs. 
+    Cost minimization mechanisms may appear most natural to the operations research community.
+  
+    With cubic costs one avoids even more allocations in which some students get a very low ranked topic than with quadratic costs. Otherwise the mechanism is the same:
     
-    Otherwise the mechanism is the same:
-    
-    1. Students again submit their preferences over topics.
+    1. Each Student ranks all topics    
     
     2. If a student $i$ is assigned a topic $t$, she ranks at position $p_{it}$, we assign to this match a cost of $c_{it}=p_{it}^3$. The algorithm finds that allocation that minimizes the sum of costs over all students.

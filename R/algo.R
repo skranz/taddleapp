@@ -6,7 +6,7 @@ example.algos = function() {
   # Common utility
   u.com = rnorm(T,0,1)
   u.ind = matrix(rnorm(T*n,0,1), n, T)
-  w = 0.5
+  w = 0.8
   u = t(w * u.com + (1-w) * t(u.ind))
 
   prefs = t(apply(u,1,rank ))
@@ -17,11 +17,12 @@ example.algos = function() {
   #prefs = t(replicate(n,sample(topics,replace = FALSE)))
   prios = runif(NROW(prefs))
   sedi = serial.dictator.alloc(prefs, prios)
+  sedi
 
-  jokers.max = rep(5,n)
-
-  joal = save.joker.alloc(prefs, jokers.max, prios=prios)
-  joal
+  stars.max = rep(3,n)
+  stara = star.range.alloc(prefs, stars.max, prios=prios)
+  stara
+  prefs
 }
 
 #' A simple serial dictator assignment
@@ -44,23 +45,22 @@ serial.dictator.alloc = function(prefs, prios = runif(NROW(prefs))) {
 }
 
 
-# First step: Move jokers
-# Second step: Assign based on jokers
+# First step: Move stars
+# Second step: Assign single stars
 # Third step: Assign remaining slots via serial.dictator.alloc
-
-save.joker.alloc = function(prefs, jokers.max, jokers.start=prefs[,1], prios = runif(NROW(prefs)), details=FALSE, verbose=TRUE) {
-  restore.point("save.joker.alloc")
+star.range.alloc = function(prefs, stars.max, stars.start=prefs[,1], prios = runif(NROW(prefs)), details=FALSE, verbose=TRUE) {
+  restore.point("save.star.alloc")
   n = length(prios)
   topics = 1:max(prefs)
 
 
-  # 1. Move jokers if a better position is free
+  # 1. Move stars if a better position is free
 
-  # Set jokers to their starting position
-  jokers = jokers.start
+  # Set stars to their starting position
+  stars = stars.start
 
-  # Count of jokers for each topic
-  top.jok = tabulate(c(jokers, topics))-1
+  # Count of stars for each topic
+  tosta = tabulate(c(stars, topics))-1
 
   ord = sample.int(n)
   has.moved = TRUE
@@ -69,51 +69,46 @@ save.joker.alloc = function(prefs, jokers.max, jokers.start=prefs[,1], prios = r
 
     for (i in ord) {
       pref = prefs[i,]
-      # Has currently single joker on topic
-      if (top.jok[jokers[i]]==1) {
-        joker.ind = which(pref == jokers[i])
+      # Has currently single star on topic
+      if (tosta[stars[i]]==1) {
+        star.ind = which(pref == stars[i])
         # Get already best topic for sure
-        if (joker.ind == 1) next
-        # Higher preference as current joker
-        hpref = pref[seq_len(joker.ind-1)]
-        free = which(top.jok[hpref]==0)
-      # No single joker on current position
+        if (star.ind == 1) next
+        # Higher preference as current star
+        hpref = pref[seq_len(star.ind-1)]
+        free = which(tosta[hpref]==0)
+      # No single star on current position
       } else {
-        hpref = pref[seq_len(jokers.max[i])]
-        free = which(top.jok[hpref]==0)
+        hpref = pref[seq_len(stars.max[i])]
+        free = which(tosta[hpref]==0)
       }
       if (length(free)>0) {
         if (verbose)
-          cat("\nStudent", i ,"moves joker from", jokers[i], "(num. ", top.jok[jokers[[i]]], ") ")
-        top.jok[jokers[i]] = top.jok[jokers[i]]-1
-        jokers[i] = hpref[free[1]]
+          cat("\nStudent", i ,"moves star from topic" , stars[i], "(num. ", tosta[stars[[i]]], ") ")
+        tosta[stars[i]] = tosta[stars[i]]-1
+        stars[i] = hpref[free[1]]
         if (verbose)
-          cat("to", jokers[i], "(num. ", top.jok[jokers[[i]]], ") ")
-        top.jok[jokers[i]] = top.jok[jokers[i]]+1
+          cat("to topic", stars[i])
+        tosta[stars[i]] = tosta[stars[i]]+1
         has.moved = TRUE
       }
     }
   }
 
-  # Assign based on jokers
+  # Assign single star topics
   res = integer(n)
-  jtopics = which(top.jok>0)
+  stopics = which(tosta==1)
+  sstud = match(stopics, stars)
+  res[sstud] = stopics
 
-  for (t in jtopics) {
-    if (top.jok[t]==1) {
-      i = which(jokers == t)
-      res[i] = t
-    } else if (top.jok[t]>1) {
-      i = sample(which(jokers==t),1)
-      res[i] = t
-    }
+  if (verbose) {
+    cat(paste0("\nStudent ",sstud, " got topic ", stopics, " via single star.", collapse=""))
   }
 
   # Assign remaining topics
   # using serial random dictatorship
-  rem.topics = setdiff(topics, jtopics)
+  rem.topics = setdiff(topics, stopics)
   rem.stud = which(res == 0)
-
 
   ord = order(-prios)
   ord = ord[ord %in% rem.stud]
@@ -125,11 +120,12 @@ save.joker.alloc = function(prefs, jokers.max, jokers.start=prefs[,1], prios = r
   }
 
   if (details) {
-    return(list(alloc=res, joker.topics = setdiff(topics, rem.topics)))
+    return(list(alloc=res, star.topics = setdiff(topics, rem.topics)))
   }
   # Return res
   res
 }
+
 
 assignment.problem.alloc = function(prefs, rank.costs=seq_len(max(prefs))^2, no.match.cost = max(rank.costs)*1000) {
   restore.point("assignment.problem.algo")

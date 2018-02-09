@@ -11,4 +11,75 @@
   white-space: pre;
   overflow-wrap: normal;
   overflow-x: scroll;
+
+  -webkit-box-sizing: border-box; /* <=iOS4, <= Android  2.3 */
+  -moz-box-sizing: border-box; /* FF1+ */
+  box-sizing: border-box; /* Chrome, IE8, Opera, Safari 5.1*/
 }
+
+#parsedTopics ol  {
+  padding-left: 2em;
+  padding-right: 0em;
+
+}
+
+.rank-table th {
+  font-weight: bold;
+  margin: 3px;
+  padding: 3px;
+  //border: solid 1px black;
+  text-align: center;
+}
+
+.rank-table td {
+  font-family: Verdana,Geneva,sans-serif;
+  margin: 0px 3px 1px 3px;
+  padding: 1px 3px 1px 3px;
+  // border-left: solid 1px black;
+  // border-right: solid 1px black;
+  border-top: solid 1px black;
+  text-align: left;
+}
+
+.rank-table tbody>tr:last-child td {
+  border-bottom: solid 1px black;
+}
+
+
+.rank-table tr.sel-row td{
+  background: #FF8;
+}
+
+.rank-table tr:nth-child(even) {
+  background: #DDD
+}
+
+.rank-table tr.sel-row td{
+  background: #FF8 !important;
+}
+
+.rank-table .col-1 {
+  font-weight: bold;
+  border-left: solid 1px black;
+}
+
+
+.rank-table .col-2 {
+  margin: 0px 1px 1px 3px;
+  padding: 1px 1px 1px 3px;
+}
+.rank-table .col-3 {
+  margin: 0px 3px 1px 1px;
+  padding: 1px 3px 1px 1px;
+}
+
+.rank-table .col-4 {
+  border-right: solid 1px black;
+}
+
+.rank.table {
+	border-collapse: collapse;
+	display: block;
+	overflow-x: auto;
+}
+
