@@ -8,6 +8,6 @@ Maintainer: Sebastian Kranz <sebastian.kranz@uni-ulm.de>
 Description: Taddle Shiny App
 License: GPL >= 2.0
 LazyData: TRUE
-Depends: stringtools, restorepoint, dplyr, clue,
+Depends: stringtools, restorepoint, dplyr, tidyr, clue,
          shiny, shinyEvents, shinyEventsUI, rmdtools,
-         shinyEventsLogin, shinythemes, webforms
+         shinyEventsLogin, shinythemes, webforms, lubridate

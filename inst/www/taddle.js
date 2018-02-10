@@ -145,3 +145,12 @@ ranktableMoveRow = function(tr, by) {
   dtr.addClass("sel-row");
 
 }
+
+get_rank_table_ranks = function() {
+  var ranks = [];
+  $("#rank-table tr" ).each(function( index ) {
+    if (index>0)
+      ranks.push($( this ).data("pos"));
+  });
+  return ranks;
+}

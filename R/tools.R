@@ -1,0 +1,42 @@
+tabulate.to = function(x, to=max(x)) {
+  y = 1:to
+  tabulate(c(x,y))-1
+}
+
+duration.string = function(t1,t2, pos.prefix="still ", neg.prefix="overdue ", names = c("years","months","days","hours","minutes")) {
+  restore.point("duration.str")
+  x = as.period(t1 %--% t2)
+  fields = c(
+    years = x$year,
+    months = x$month,
+    days = x$day,
+    hours = x$hour,
+    minutes = x$minute
+  )
+  use = which(fields != 0)
+  if (length(use)==0) use = 5
+  txt = paste0(fields[use]," ",names[use], collapse=", ")
+  if (as.numeric(x) >=0) {
+    txt = paste0(pos.prefix,txt)
+  } else {
+    txt = paste0(neg.prefix, txt)
+  }
+  txt
+}
+
+
+is.empty.val = function(val) {
+  if (is.null(val)) return(TRUE)
+  if (nchar(val)==0) return(TRUE)
+  return(FALSE)
+
+}
+
+
+to.label = function(val, keys, labels = names(keys)) {
+  restore.point("to.label")
+  if (is.null(keys)) return(val)
+  ind = match(val, unlist(keys))
+  labels[ind]
+}
+

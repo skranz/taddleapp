@@ -136,8 +136,9 @@ assignment.problem.alloc = function(prefs, rank.costs=seq_len(max(prefs))^2, no.
 
   costs = matrix(rank.costs[prefs],n,T)
   if (n>T) {
-    costs = cbind(costs, matrix(no.match.costs,n,n-T))
+    costs = cbind(costs, matrix(no.match.cost,n,n-T))
   }
   res = solve_LSAP(costs)
+  res[res>T] = NA
   as.integer(res)
 }

@@ -11,6 +11,10 @@ tat:
     method: CHARACTER(10)
     topictext: TEXT
     deadline: DATETIME
+    deadline_type: CHARACTER(2)
+    random_order: BOOLEAN
+    descr: TEXT
+    status: CHARACTER(2)
     create_time: DATETIME
 
 topic:
@@ -25,8 +29,9 @@ student:
     studkey: CHARACTER(20)
     studemail: VARCHAR(50)
     studname: VARCHAR(30)
-    first_rank: DATETIME
-    last_rank: DATETIME
+    first_ranking: DATETIME
+    last_ranking: DATETIME
+    num_ranking: INTEGER
 
 ranking:
   table:
