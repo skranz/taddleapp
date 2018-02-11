@@ -95,12 +95,11 @@ about.ui = function() {
   )
 
 }
-
 taddle.send.email = function(to, subject, body,from=app$glob$email.sender, smtp.server = app$glob$smtp.server, app=getApp()) {
   restore.point("taddle.send.email")
   if (is.empty.val(smtp.server)) {
     cat("\nNo smtp server specified.")
     return()
   }
-  try(sendmail(from=from, to=to, subject=subject, body=body, control=list(smptServer=smtp.server)))
+  try(sendmailR::sendmail(from=from, to=to, subject=subject, msg=sep.lines(body), control=list(smtpServer=smtp.server)))
 }
