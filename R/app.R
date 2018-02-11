@@ -15,7 +15,7 @@ taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), email.sen
 
   glob$base.url = base.url
   glob$email.sender = email.sender
-  glob$smpt.server = smtp.server
+  glob$smtp.server = smtp.server
   glob$taddle.dir = taddle.dir
   glob$db.dir = db.dir
 
@@ -97,6 +97,7 @@ about.ui = function() {
 }
 
 taddle.send.email = function(to, subject, body,from=app$glob$email.sender, smtp.server = app$glob$smtp.server, app=getApp()) {
+  restore.point("taddle.send.email")
   if (is.empty.val(smtp.server)) {
     cat("\nNo smtp server specified.")
     return()
