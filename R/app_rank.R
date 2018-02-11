@@ -70,7 +70,7 @@ get.stud.tat = function(studkey, db=getApp()$glob$db) {
   tops = dbGet(db,"topic", list(tatid=ta$tatid))
 
 
-  ra = dbGet(db,"ranking", list(tatid=tatid, studemail=stud$studemail))
+  ra = dbGet(db,"ranking", list(tatid=tatid, studemail=stu$studemail))
   ra = left_join(ra, select(tops,pos,topic), by="pos")
   stu$ra = ra
 
