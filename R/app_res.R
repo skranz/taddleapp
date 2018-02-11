@@ -207,7 +207,8 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
     #restore.point("jhkjahdkjshkfh")
     ranks = filter(ras, pos==.pos)$rank
     ccn = cc
-    ccn[todf$rank[.pos]] = "red"
+    row = which(todf$pos == .pos)
+    ccn[todf$rank[row]] = "red"
     spk_chr(tabulate.to(ranks,max.rank), type="bar", colorMap = ccn, tooltipFormat = '{{value}} ranked as 1+{{offset}}')
   }))
 
