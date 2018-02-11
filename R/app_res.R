@@ -112,7 +112,7 @@ allocs.count.table.ui = function(tat=app$tat, app=getApp()) {
     restore.point("count.sparkline")
     vals = count.mat[row,]
     names(vals) = NULL
-    spk_chr(vals, type="bar")
+    spk_chr(vals, type="bar",chartRangeMin=0)
   }))
 
   df = select(df, method, sl, everything())
@@ -208,7 +208,7 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
     ccn = cc
     row = which(todf$pos == .pos)
     ccn[todf$rank[row]] = "red"
-    spk_chr(tabulate.to(ranks,max.rank), type="bar", colorMap = ccn, tooltipFormat = '{{value}} ranked as 1+{{offset}}')
+    spk_chr(tabulate.to(ranks,max.rank),chartRangeMin=0, type="bar", colorMap = ccn, tooltipFormat = '{{value}} ranked as 1+{{offset}}')
   }))
 
   na.rows = which(is.na(todf$pos))
