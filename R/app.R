@@ -7,7 +7,7 @@ examples.taddleApp = function() {
 }
 
 
-taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), email.sender = "taddle@uni-ulm.de", smtp.server = "", ignore.methods =c("costmin_cubic"), base.url = "http://taddle.mathematik.uni-ulm.de",  ...) {
+taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), email.sender = "taddle@uni-ulm.de", smtp.server = "", ignore.methods =c("costmin_cubic"), base.url = "http://taddle.mathematik.uni-ulm.de", app.title = "Taddle: Easily Allocate Seminar Topics",  ...) {
   restore.point("clickerClientApp")
   app = eventsApp()
 
@@ -41,6 +41,7 @@ taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), email.sen
 
   css.file = system.file("www/taddle.css", package="taddleapp")
   app$ui = fluidPage(theme=shinytheme("cerulean"),
+    tags$head(tags$title(app.title)),
     sparkline:::spk_dependencies(),
     fontAwesomeHeader(),
     mathjaxHeader(),
