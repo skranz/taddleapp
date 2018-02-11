@@ -2,7 +2,9 @@ examples.taddleApp = function() {
   restore.point.options(display.restore.point=TRUE)
   setwd("D:/libraries/taddle/")
   app = taddleApp("D:/libraries/taddle/shared")
-  viewApp(app, url.args = list(rank="pdsywc"))
+  viewApp(app, url.args = list(rank="dobsvw"))
+  viewApp(app, url.args = list(crank="BFfOtPbWhBvUtuqYZLGw"))
+
 
   create.random.ranks("pdsywc")
 
@@ -53,7 +55,7 @@ get.rank.tat = function(rankkey, db=getApp()$glob$db) {
 
   ta$stu = empty.stu(ta)
 
-  ta
+  as.environment(ta)
 
 }
 
@@ -76,7 +78,7 @@ get.stud.tat = function(studkey, db=getApp()$glob$db) {
 
   ta$tops = tops
   ta$stu = stu
-  ta
+  as.environment(ta)
 }
 
 
@@ -93,7 +95,7 @@ empty.stu = function(tat) {
   ra = arrange(ra, rank)
 
 
-  stu = list(ra=ra,tatid=tat$tatid, studemail="", studname="", studkey=random.string(1,20), num_ranking=0, last_ranking=NULL, first_ranking=NULL)
+  stu = list(ra=ra,tatid=tat$tatid, studemail="", studname="", studkey="", num_ranking=0, last_ranking=NULL, first_ranking=NULL)
 
   stu
 }
@@ -127,17 +129,52 @@ show.rank.ui = function(tat = app$tat, app=getApp()) {
     h4(tat$title),
     HTML(tat$descr),
     HTML(topic.rank.table(tat)),
+    br(),
     textInput("studname", "Your name:",value=stu$studname),
-    textInput("studemail", "Your email:",value=stu$studemail),
+    textInput("studemail", "Email:",value=stu$studemail),
     helpText("To submit your ranking, press the button below. You will still be able to change it afterwards."),
     uiOutput("rankAlert"),
-    simpleButton("submitRankingBtn","Submit Ranking", form.ids = c("studname","studemail"))
+    simpleButton("submitRankingBtn","Submit Ranking", form.ids = c("studname","studemail")),
+    simpleButton("delRankingBtn","Delete your Ranking")
   )
+
+  buttonHandler("delRankingBtn",function(...) {
+    restore.point("delRankingBtn")
+    stu = tat$stu
+    if (is.empty.val(stu$studkey)) {
+      timedMessage("rankAlert",msg="You have not yet saved a ranking that can be deleted.", millis=5000)
+      return()
+    }
+
+    db = app$glob$db
+    dbWithTransaction(db,{
+      dbDelete(db,"student", list(tatid=tat$tatid, studemail=tat$stu$studemail))
+      dbDelete(db,"ranking", list(tatid=tat$tatid, studemail=tat$stu$studemail))
+    })
+    log.action("del_ranking", email=tat$stu$studemail)
+    timedMessage("rankAlert",msg=paste0("Ranking for ", tat$stu$studemail, " has been deleted."), millis=5000)
+
+    rank.url = paste0(app$glob$base.url,"?rank=", tat$rankkey)
+    body = paste0("Hello ", tat$stu$studname,",\n\nyou just have deleted your topic ranking for ", tat$title,".\n\nYou can submit a new ranking under the following link:\n\n",rank.url, "\n\n---\nThis is an automatically generated email. Please don't reply.")
+
+    taddle.send.email(to=tat$stu$studemail,subject = paste0(tat$title,": Your ranking has been deleted"), body = body)
+
+    tat$stu$studemail = ""
+    tat$stu$studkey = ""
+
+
+  })
 
   ranking.submit.event(function(ranks, formValues,tat=getApp()$tat,...) {
     restore.point("ranking.submit.handler")
 
-    tat$stu$studemail = formValues$studemail
+    if (is.empty.val(tat$stu$studemail)) {
+      tat$stu$studemail = formValues$studemail
+    } else if (formValues$studemail != tat$stu$studemail) {
+      msg=paste0("Sorry, but you already specified the email address ", tat$stu$studemail,". To change your email address, you first must delete your ranking by pressing the button below.")
+      timedMessage("rankAlert", html=colored.html(msg), millis=60000)
+      return()
+    }
     tat$stu$studname = formValues$studname
 
     pos = unlist(ranks)
@@ -174,9 +211,9 @@ topic.rank.table = function(tat, app=getApp()) {
 
 submit.ranking = function(tat=app$tat, app=getApp(), glob=app$glob,...) {
   restore.point("submit.ranking")
-  stu = tat$stu
+  stu = as.list(tat$stu)
 
-  res = verify.stu(tat$stu)
+  res = verify.stu(stu)
   if (!res$ok) {
     timedMessage("rankAlert",colored.html(res$msg), millis=20000)
     return()
@@ -189,6 +226,9 @@ submit.ranking = function(tat=app$tat, app=getApp(), glob=app$glob,...) {
     stu$first_ranking = time
   stu$last_ranking = time
   stu$num_ranking = stu$num_ranking+1
+  if (is.empty.val(stu$studkey))
+    stu$studkey = random.string(1,20)
+  tat$stu = stu
 
   ras = transmute(stu$ra, tatid=tat$tatid, studemail = stu$studemail, pos=pos, shownpos=shownpos, rank=rank)
 
@@ -200,7 +240,7 @@ submit.ranking = function(tat=app$tat, app=getApp(), glob=app$glob,...) {
     dbDelete(glob$db, "ranking", list(tatid=tat$tatid, studemail=stu$studemail))
 
 
-    dbInsert(glob$db, "student", as.list(tat$stu))
+    dbInsert(glob$db, "student", stu)
     dbInsert(glob$db, "ranking", ras)
   })
 

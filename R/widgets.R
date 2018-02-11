@@ -4,8 +4,8 @@ colored.html = function(txt, color="#cc0000") {
 }
 
 simpleTimeInput = function(id,label=NULL, value="", width=NULL) {
-  input = tags$input(type = "time", class = "form-control",name=id, value=value)
-  tags$div(id = id, class = "shiny-time-input form-group shiny-input-container", style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"), if (!is.null(label)) shiny:::controlLabel(id, label), input)
+  input = tags$input(type = "time", class = "form-control",name=id,id=id, value=value)
+  tags$div(id = paste0("div-id"), class = "shiny-time-input form-group shiny-input-container", style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"), if (!is.null(label)) shiny:::controlLabel(id, label), input)
 
 
 }

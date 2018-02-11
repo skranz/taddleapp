@@ -35,7 +35,7 @@ new.home.ui = function(..., app=getApp(), glob=app$glob) {
 }
 
 empty.tat = function(...) {
-  as.environment(list(new=TRUE, key = random.string(), topic.text="Example Topic 1\nExample Topic 2\nExample Topic 3", topics=c("Example Topic 1", "Example Topic 2", "Example Topic 3"), num.topics=0, method="no", multiline=FALSE, deadline.date = NA, deadline.time="23:59", deadline_type="", email=NULL, random_order=TRUE, status="", descr="" ))
+  as.environment(list(new=TRUE, key = random.string(), topic.text="Example Topic 1\nExample Topic 2\nExample Topic 3", topics=c("Example Topic 1", "Example Topic 2", "Example Topic 3"), num.topics=0, method="no", multiline=FALSE, deadline_date = NA, deadline_time="23:59", deadline_type="", email=NULL, random_order=TRUE, status="", descr="" ))
 }
 
 new.step1.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
@@ -89,13 +89,13 @@ new.step2.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
     h3("Step 2: Customize"),
     p("You can enter a deadline until students should enter their preferences:"),
     tags$table(
-      tags$td(shiny::dateInput("deadlineDate","Deadline Date", value=tat$deadline.date)),
-      tags$td(style="padding-left: 2em;", simpleTimeInput("deadlineTime", "Deadline Time", width="12em", value=tat$deadline.time))
+      tags$td(shiny::dateInput("deadline_date","Deadline Date", value=tat$deadline_date)),
+      tags$td(style="padding-left: 2em;", simpleTimeInput("deadline_time", "Deadline Time", width="12em", value=tat$deadline_time))
     ),
     selectInput("method","Allocation Method", methods),
     uiOutput("methodDescr"),
-    selectInput("random_order", "How are topics shown?",list("Show topics in random order to students. (may facilitate more diversification in students rankings)"=TRUE, "Show topics in the original to students"=FALSE)),
-    simpleButton("back2Btn","Back", form.ids = c("deadlineDate","deadlineTime","method","email", "agree")),
+    selectInput("random_order", "How are topics shown?",list("Show topics in random order to students. (May yield more diversified rankings.)"=TRUE, "Show topics in the original order to students."=FALSE)),
+    simpleButton("back2Btn","Back", form.ids = c("deadline_date","deadline_time","method","email", "agree")),
     simpleButton("cont2Btn","Continue", form.ids = c("titleInput","topicsInput"))
   )
 
@@ -132,8 +132,8 @@ new.step3.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
     checkboxInput("agree","I agree that anonymized data of the allocation task can be used and shared for research purposes.",value = FALSE),
     uiOutput("newSubmitAlert"),
 
-    simpleButton("back3Btn","Back", form.ids = c("deadlineDate","deadlineTime","method","email", "agree")),
-    simpleButton("createTatBtn","Create the Allocation Task", form.ids = c("deadlineDate","deadlineTime","method","email","agree", "random_order", "topicsInput", "titleInput"))
+    simpleButton("back3Btn","Back", form.ids = c("deadline_date","deadline_time","method","email", "agree")),
+    simpleButton("createTatBtn","Create the Allocation Task", form.ids = c("deadline_date","deadline_time","method","email","agree", "random_order", "topicsInput", "titleInput"))
   )
 
   buttonHandler("back3Btn", function(formValues, ...,tat=app$tat, app=getApp()) {
@@ -144,8 +144,8 @@ new.step3.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
   buttonHandler("createTatBtn", function(formValues, ...,tat=app$tat, app=getApp()) {
     restore.point("createTatBtn")
     tat$email = formValues$email
-    tat$deadlineDate = formValues$deadlineDate
-    tat$deadlineTime = formValues$deadlineTime
+    tat$deadline_date = formValues$deadline_date
+    tat$deadline_time = formValues$deadline_time
     tat$method = formValues$method
     tat$agree = formValues$agree
     tat$random_order = formValues$random_order
@@ -180,10 +180,10 @@ submit.new.tat = function(..., tat=app$tat, app=getApp(), glob=app$glob) {
   tat$tatid = random.string(1,20)
   tat$rankkey = paste0(sample(letters,6, replace=TRUE), collapse="")
   tat$org_method = tat$method
-  if (is.empty.val(tat$deadline.date)) {
+  if (is.empty.val(tat$deadline_date)) {
     tat$deadline = NA
   } else {
-    tat$deadline = as.POSIXct(paste0(tat$deadline.date," ", tat$deadline.time))
+    tat$deadline = as.POSIXct(paste0(tat$deadline_date," ", tat$deadline_time))
   }
   tat$create_time = Sys.time()
 

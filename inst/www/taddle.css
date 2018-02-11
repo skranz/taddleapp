@@ -41,6 +41,9 @@
   text-align: left;
 }
 
+.simple-td-bottom {
+  border-bottom: solid 1px black;
+}
 
 .rank-table tbody>tr:last-child td, , .simple-table  tbody>tr:last-child td{
   border-bottom: solid 1px black;
