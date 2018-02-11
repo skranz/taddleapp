@@ -27,7 +27,8 @@ duration.string = function(t1,t2, pos.prefix="still ", neg.prefix="overdue ", na
 
 is.empty.val = function(val) {
   if (is.null(val)) return(TRUE)
-  if (nchar(val)==0) return(TRUE)
+  if (isTRUE(nchar(val)==0)) return(TRUE)
+  if (is.na(val)) return(TRUE)
   return(FALSE)
 
 }

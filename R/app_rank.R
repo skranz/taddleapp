@@ -57,6 +57,29 @@ get.rank.tat = function(rankkey, db=getApp()$glob$db) {
 
 }
 
+
+get.stud.tat = function(studkey, db=getApp()$glob$db) {
+  restore.point("get.stud.tat")
+  stu = dbGet(db,"student", list(studkey=studkey))
+  stu = as.list(stu)
+  tatid = stu$tatid
+  ta = dbGet(db,"tat", list(tatid = tatid))
+  if (NROW(ta)==0) return(NULL)
+  ta = ta[NROW(ta),]
+  ta = as.list(ta)
+  tops = dbGet(db,"topic", list(tatid=ta$tatid))
+
+
+  ra = dbGet(db,"ranking", list(tatid=tatid, studemail=stud$studemail))
+  ra = left_join(ra, select(tops,pos,topic), by="pos")
+  stu$ra = ra
+
+  ta$tops = tops
+  ta$stu = stu
+  ta
+}
+
+
 empty.stu = function(tat) {
   restore.point("empty.stu")
   ra = tat$tops
@@ -79,10 +102,19 @@ show.rank.ui = function(tat = app$tat, app=getApp()) {
   restore.point("show.rank.ui")
   stu = tat$stu
   if (is.null(tat)) {
-    ui = h3("Sorry, but the specified allocation task is not available.")
+    ui = h4("Sorry, but the specified allocation task is not available.")
     setUI("mainUI",ui)
     return()
   }
+  if (!is.empty.val(tat$deadline)) {
+    if (tat$deadline < Sys.time()) {
+      ui = h4("Sorry, but the deadline for rankings has already passed.")
+      setUI("mainUI",ui)
+      return()
+
+    }
+  }
+
 
   if (is.null(tat$descr)) {
     tat$descr = paste0("Please rank the topics for ", tat$title, " until <b>", format(tat$deadline,"%A, %B %d at %H:%M"),"</b>. Put your most preferred topic on top and your worst preferred topic on the bottom.")
@@ -93,7 +125,7 @@ show.rank.ui = function(tat = app$tat, app=getApp()) {
     HTML(tat$descr),
     HTML(topic.rank.table(tat)),
     textInput("studname", "Your name:",value=stu$studname),
-    textInput("studemail", "Your email:",value=stu$studname),
+    textInput("studemail", "Your email:",value=stu$studemail),
     helpText("To submit your ranking press the button below. You will still be able to change it afterwards."),
     uiOutput("rankAlert"),
     simpleButton("submitRankingBtn","Submit Ranking", form.ids = c("studname","studemail"))
@@ -134,7 +166,6 @@ topic.rank.table = function(tat, app=getApp()) {
   df = data_frame(rank = ra$rank,upBtn, downBtn, ra$topic)
   HTML(simpleTable(id="rank-table", df, class="rank-table", col.names = c("Rank","","", "Topic"), row.data=list(rowid = 1:n, pos=ra$pos)))
 
-
 }
 
 
@@ -150,8 +181,6 @@ submit.ranking = function(tat=app$tat, app=getApp(), glob=app$glob,...) {
     shinyEventsUI::errorMessage("rankAlert","")
   }
 
-
-  stu$studkey = random.string(1,20)
   time = Sys.time()
   if (is.null(stu$first_ranking))
     stu$first_ranking = time
@@ -172,7 +201,19 @@ submit.ranking = function(tat=app$tat, app=getApp(), glob=app$glob,...) {
     dbInsert(glob$db, "ranking", ras)
   })
 
+  log.action("rank",email=stu$studemail, studname=stu$studname)
+
   timedMessage("rankAlert", html=paste0("Thanks a lot, your ranking has been submitted. You also will receive an email from ", glob$email.sender, " with a link that allows you to modify your ranking until the deadline."), millis = 60000)
+
+  rato = left_join(ras, select(tat$tops,pos,topic), by="pos") %>%
+    arrange(rank) %>%
+    select(rank, topic)
+
+  url = paste0(app$glob$base.url,"?crank=",stu$studkey)
+  body = paste0("Hello ", stu$studname,",\nyou just submitted your ranking of topics for '", tat$title,"'.\nIf you want to change your ranking ", if(!is.empty.val(tat$deadline)) paste0(" until the deadline ", format(tat$deadline,"%y-%m-%d %H:%M")), " use the following link:\n\n",url,"\n\nYour submitted ranking is as follows:\n\n", paste0(rato$rank,". ", rato$topic, collapse="\n"),
+    "\n\n---\nThis was an automatically generated email. Please don't reply.")
+
+  taddle.send.email(to=stu$studemail, subject = paste0(tat$title, ": Your Ranking of Topics"), body=body)
 
 }
 

@@ -40,12 +40,14 @@ serial.dictator.alloc = function(prefs, prios = runif(NROW(prefs)), return.pref.
   pers = 1:n
   pers[ord] = 1:n
 
-  res = integer(n)
+  res = rep(NA_integer_,n)
 
   i = 1
   for (i in pers) {
     found = topics[which.min(prefs[i, topics])]
-    res[i] = found
+    if (length(found)==1)
+      res[i] = found
+
     topics = setdiff(topics, found)
   }
   res

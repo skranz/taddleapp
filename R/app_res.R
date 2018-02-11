@@ -7,7 +7,7 @@ examples.taddleApp = function() {
   viewApp(app, url.args = list(key="wBHxoAvHhvqVTYeHNtwa"))
   viewApp(app)
 
-  create.random.ranks("zdaqjj", common.weight = 0.25)
+  create.random.ranks("zdaqjj", common.weight = 0.25,n = 10)
 }
 
 show.res.ui = function(tat = app$tat, app=getApp(),...) {
@@ -147,8 +147,7 @@ compute.tat.allocation = function(method = "costmin_lin", tat) {
   prefs = matrix(ras$rank, nrow=n, ncol=T, byrow = TRUE)
 
   if (method == "serialdict") {
-
-    alloc = serial.dictator.alloc(prefs, prios=n:1)
+    alloc = serial.dictator.alloc(prefs)
     restore.point("serialdict.alloc")
   } else if (method == "costmin_lin") {
     alloc = assignment.problem.alloc(prefs,rank.costs = (1:T)^(1.01))
@@ -187,14 +186,21 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
   ras = tat$ras
   max.rank = max(ras$rank)
   cc = rep("blue", max.rank)
+  todf$sl = ""
 
-  todf$sl = lapply(unique(todf$pos), function(.pos) {
-    restore.point("jhkjahdkjshkfh")
+  todf$sl[!is.na(todf$pos)] = unlist(lapply(setdiff(unique(todf$pos),NA), function(.pos) {
+    #restore.point("jhkjahdkjshkfh")
     ranks = filter(ras, pos==.pos)$rank
     ccn = cc
     ccn[todf$rank[.pos]] = "red"
     spk_chr(tabulate.to(ranks,max.rank), type="bar", colorMap = ccn, tooltipFormat = '{{value}} ranked as 1+{{offset}}')
-  })
+  }))
+
+  na.rows = which(is.na(todf$pos))
+  todf$topic[na.rows] = "-No Topic-"
+  todf$pos[na.rows] = ""
+  todf$rank[na.rows] = ""
+
 
   tohtml = rmdtools::html.table(todf,col.names = c("","Topic","Student","Ranked as","Topic Ranks"))
 

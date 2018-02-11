@@ -9,8 +9,9 @@ examples.taddleApp = function() {
 show.new.ui = function(...) {
   ui = navlistPanel(id="mainPanel",
     tabPanel("Taddle",value="home", new.home.ui()),
-    tabPanel("Step 1",value="step1", new.step1.ui()),
-    tabPanel("Step 2",value="step2", new.step2.ui()),
+    tabPanel("Step 1 (Topics)",value="step1", new.step1.ui()),
+    tabPanel("Step 2 (Customize)",value="step2", new.step2.ui()),
+    tabPanel("Step 3 (Submit)",value="step3", new.step3.ui()),
     tabPanel("About", about.ui()),
     widths = c(2,10)
   )
@@ -34,7 +35,7 @@ new.home.ui = function(..., app=getApp(), glob=app$glob) {
 }
 
 empty.tat = function(...) {
-  as.environment(list(new=TRUE, key = random.string(), topic.text="Example Topic 1\nExample Topic 2\nExample Topic 3", topics=c("Example Topic 1", "Example Topic 2", "Example Topic 3"), num.topics=0, method="no", multiline=FALSE, deadline.date = Sys.Date(), deadline.time="23:59", deadline_type="", email=NULL, random_order=TRUE, status="", descr="" ))
+  as.environment(list(new=TRUE, key = random.string(), topic.text="Example Topic 1\nExample Topic 2\nExample Topic 3", topics=c("Example Topic 1", "Example Topic 2", "Example Topic 3"), num.topics=0, method="no", multiline=FALSE, deadline.date = NA, deadline.time="23:59", deadline_type="", email=NULL, random_order=TRUE, status="", descr="" ))
 }
 
 new.step1.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
@@ -85,45 +86,26 @@ new.step2.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
   #methods = c(list("Choose matching method later"="no"), methods)
 
   ui = tagList(
-    h3("Step 2"),
-    p("Deadline until students can enter their preferences:"),
+    h3("Step 2: Customize"),
+    p("You can enter a deadline until students should enter their preferences:"),
     tags$table(
       tags$td(shiny::dateInput("deadlineDate","Deadline Date", value=tat$deadline.date)),
       tags$td(style="padding-left: 2em;", simpleTimeInput("deadlineTime", "Deadline Time", width="12em", value=tat$deadline.time))
     ),
     selectInput("method","Allocation Method", methods),
     uiOutput("methodDescr"),
-    selectInput("random_order", "How are topics shown?",list("Show topics in random order to students"=TRUE, "Show topics in the original to students"=FALSE)),
-    helpText("Showing topics in random order may facilitate more diversification in students rankings."),
-    textInput("email","Your Email"),
-    checkboxInput("agree","I agree that anonymized data of the allocation task can be used and shared for research purposes.",value = FALSE),
-    uiOutput("newSubmitAlert"),
-
+    selectInput("random_order", "How are topics shown?",list("Show topics in random order to students. (may facilitate more diversification in students rankings)"=TRUE, "Show topics in the original to students"=FALSE)),
     simpleButton("back2Btn","Back", form.ids = c("deadlineDate","deadlineTime","method","email", "agree")),
-    simpleButton("createTatBtn","Create the Allocation Task", form.ids = c("deadlineDate","deadlineTime","method","email","agree", "topicsInput", "titleInput"))
+    simpleButton("cont2Btn","Continue", form.ids = c("titleInput","topicsInput"))
   )
 
   buttonHandler("back2Btn", function(formValues, ...,tat=app$tat, app=getApp()) {
     restore.point("back2Btn")
     show.step.ui(1)
   })
-
-  buttonHandler("createTatBtn", function(formValues, ...,tat=app$tat, app=getApp()) {
-    restore.point("createTatBtn")
-    tat$email = formValues$email
-    tat$deadlineDate = formValues$deadlineDate
-    tat$deadlineTime = formValues$deadlineTime
-    tat$method = formValues$method
-    tat$agree = formValues$agree
-    tat$random_order = formValues$random_order
-
-    tat$title = formValues$titleInput
-    tat$topic.text = formValues$topicsInput
-    tat$topics = parse.topic.text(tat$topic.text)
-    tat$num.topics = length(tat$topics)
-
-    submit.new.tat(tat)
-
+  buttonHandler("cont2Btn", function(formValues, ...,tat=app$tat, app=getApp()) {
+    restore.point("cont2Btn")
+    show.step.ui(3)
   })
 
   selectChangeHandler("method", function(value,...){
@@ -138,34 +120,25 @@ new.step2.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
   ui
 }
 
-new.step2.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
-  restore.point("new.step2.ui")
+new.step3.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
+  restore.point("new.step3.ui")
   methods = names(glob$methods)
   names(methods) = sapply(glob$methods, function(m) m$title)
   #methods = c(list("Choose matching method later"="no"), methods)
 
   ui = tagList(
-    h3("Step 2"),
-    p("Deadline until students can enter their preferences:"),
-    tags$table(
-      tags$td(shiny::dateInput("deadlineDate","Deadline Date", value=tat$deadline.date)),
-      tags$td(style="padding-left: 2em;", simpleTimeInput("deadlineTime", "Deadline Time", width="12em", value=tat$deadline.time))
-    ),
-    selectInput("method","Allocation Method", methods),
-    uiOutput("methodDescr"),
-    selectInput("random_order", "How are topics shown?",list("Show topics in random order to students"=TRUE, "Show topics in the original to students"=FALSE)),
-    helpText("Showing topics in random order may facilitate more diversification in students rankings."),
+    h3("Step 3: Submit"),
     textInput("email","Your Email"),
     checkboxInput("agree","I agree that anonymized data of the allocation task can be used and shared for research purposes.",value = FALSE),
     uiOutput("newSubmitAlert"),
 
-    simpleButton("back2Btn","Back", form.ids = c("deadlineDate","deadlineTime","method","email", "agree")),
-    simpleButton("createTatBtn","Create the Allocation Task", form.ids = c("deadlineDate","deadlineTime","method","email","agree", "topicsInput", "titleInput"))
+    simpleButton("back3Btn","Back", form.ids = c("deadlineDate","deadlineTime","method","email", "agree")),
+    simpleButton("createTatBtn","Create the Allocation Task", form.ids = c("deadlineDate","deadlineTime","method","email","agree", "random_order", "topicsInput", "titleInput"))
   )
 
-  buttonHandler("back2Btn", function(formValues, ...,tat=app$tat, app=getApp()) {
-    restore.point("back2Btn")
-    show.step.ui(1)
+  buttonHandler("back3Btn", function(formValues, ...,tat=app$tat, app=getApp()) {
+    restore.point("back3Btn")
+    show.step.ui(2)
   })
 
   buttonHandler("createTatBtn", function(formValues, ...,tat=app$tat, app=getApp()) {
@@ -185,16 +158,6 @@ new.step2.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
     submit.new.tat(tat)
 
   })
-
-  selectChangeHandler("method", function(value,...){
-    restore.point("allocMethodChange")
-    tat$method = value
-    m = glob$methods[[tat$method]]
-    setUI("methodDescr",withMathJaxNoHeader(HTML(m$descr)))
-  })
-
-  m = glob$methods[[tat$method]]
-  setUI("methodDescr",withMathJaxNoHeader(HTML(m$descr)))
   ui
 }
 
@@ -217,7 +180,11 @@ submit.new.tat = function(..., tat=app$tat, app=getApp(), glob=app$glob) {
   tat$tatid = random.string(1,20)
   tat$rankkey = paste0(sample(letters,6, replace=TRUE), collapse="")
   tat$org_method = tat$method
-  tat$deadline = as.POSIXct(paste0(tat$deadline.date," ", tat$deadline.time))
+  if (is.empty.val(tat$deadline.date)) {
+    tat$deadline = NA
+  } else {
+    tat$deadline = as.POSIXct(paste0(tat$deadline.date," ", tat$deadline.time))
+  }
   tat$create_time = Sys.time()
 
   tops = data_frame(tatid = tat$tatid, pos=seq_along(tat$topics), topic=tat$topics)
@@ -234,13 +201,19 @@ submit.new.tat = function(..., tat=app$tat, app=getApp(), glob=app$glob) {
   res.url = paste0(app$glob$base.url,"?key=", tat$tatid)
   ui = tagList(
     h4("The allocation task has been generated"),
-    p("Please inform your students that they can now enter their ranking of topics under the following link:"),
+    p("Your students that can now enter their ranking of topics under the following link. (You can inform them via email)."),
     tags$a(href=rank.url, target="_blank", rank.url),
-    br(),p("You see the results under the following link:"),
+    br(),p("You can see the results under the following link:"),
     tags$a(href=res.url, target="_blank", res.url),
     br(),p("We have also send you an email with this information.")
   )
   setUI("newSubmitAlert", ui)
+
+
+  body = paste0("Hello,\nyou just generated a new topic allocation task with Taddle.\nYour students can enter their ranking of topics under the following link (you can send the link to your students):\n\n",rank.url,"\n\nYou can see the results under the following link (keep that link private):\n\n",res.url,"\n\n", if(!is.empty.val(tat$deadline)) paste0(" You have set the deadline ", format(tat$deadline,"%y-%m-%d %H:%M"),".\n\n"),
+    "---\nThis was an automatically generated email. Please don't reply.")
+
+  taddle.send.email(to=tat$email, subject = paste0("New Allocation Task: ", tat$title), body=body)
 }
 
 

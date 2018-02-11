@@ -7,7 +7,7 @@ examples.taddleApp = function() {
 }
 
 
-taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), email.sender = "taddle@uni-ulm.de", ignore.methods =c("costmin_cubic"), base.url = "taddle.mathematik.uni-ulm.de", ...) {
+taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), email.sender = "taddle@uni-ulm.de", smtp.server = "", ignore.methods =c("costmin_cubic"), base.url = "http://taddle.mathematik.uni-ulm.de",  ...) {
   restore.point("clickerClientApp")
   app = eventsApp()
 
@@ -55,6 +55,9 @@ taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), email.sen
       if (!is.null(query$rank)) {
         app$tat = get.rank.tat(rankkey=query$rank)
         show.rank.ui()
+      } else if (!is.null(query$crank)) {
+        app$tat = get.stud.tat(rankkey=query$crank)
+        show.rank.ui()
       } else if (!is.null(query$key)) {
         app$tat = get.res.tat(tatid=query$key)
         show.res.ui()
@@ -89,4 +92,12 @@ about.ui = function() {
     p("The 'Ta' in Taddle stands for 'Topic Assignment'. The remaining letters have no meaning.")
   )
 
+}
+
+taddle.send.email = function(to, subject, body,from=app$glob$email.sender, smtp.server = app$glob$smtp.server, app=getApp()) {
+  if (is.empty.val(smtp.server)) {
+    cat("\nNo smtp server specified.")
+    return()
+  }
+  try(sendmail(from=from, to=to, subject=subject, body=body, control=list(smptServer=smtp.server)))
 }
