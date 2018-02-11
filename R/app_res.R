@@ -99,7 +99,7 @@ allocs.count.table.ui = function(tat=app$tat, app=getApp()) {
   restore.point("allocs.count.table.ui")
   df = allocs.count.table(tat)
 
-  count.mat = as.matrix(df[,-1])
+  count.mat = as.matrix(df[,-1,drop=FALSE])
   mat = as.matrix(df)
   mat[mat=="0"] = ""
 
@@ -118,7 +118,7 @@ allocs.count.table.ui = function(tat=app$tat, app=getApp()) {
 
   df = select(df, method, sl, everything())
 
-  html = simpleTable(id="counts-table",class="simple-table count-table", df=df,col.names = c("","", paste0("Rank ", colnames(mat[,-(1)]))) )
+  html = simpleTable(id="counts-table",class="simple-table count-table", df=df,col.names = c("","", paste0("Rank ", colnames(mat[,-(1), drop=FALSE]))) )
   HTML(html)
 
 }
