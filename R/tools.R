@@ -7,11 +7,11 @@ duration.string = function(t1,t2, pos.prefix="still ", neg.prefix="overdue ", na
   restore.point("duration.str")
   x = as.period(t1 %--% t2)
   fields = c(
-    years = x$year,
-    months = x$month,
-    days = x$day,
-    hours = x$hour,
-    minutes = x$minute
+    years = abs(x$year),
+    months = abs(x$month),
+    days = abs(x$day),
+    hours = abs(x$hour),
+    minutes = abs(x$minute)
   )
   use = which(fields != 0)
   if (length(use)==0) use = 5

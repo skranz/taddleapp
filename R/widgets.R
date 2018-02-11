@@ -3,14 +3,14 @@ colored.html = function(txt, color="#cc0000") {
   paste0("<font color='",color,"'>",txt,"</font>")
 }
 
-simpleTimeInput = function(id=random.string(1),df, label=NULL, value="", width=NULL) {
+simpleTimeInput = function(id,label=NULL, value="", width=NULL) {
   input = tags$input(type = "time", class = "form-control",name=id, value=value)
   tags$div(id = id, class = "shiny-time-input form-group shiny-input-container", style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"), if (!is.null(label)) shiny:::controlLabel(id, label), input)
 
 
 }
 
-simpleTable = function(id, df, col.names=colnames(df), col.tooltips=FALSE, class="simple-table", format.values = TRUE, wrap=FALSE, signif.digits=8, round.digits=8, row.data = list(rowid = seq_len(NROW(df)))) {
+simpleTable = function(id=random.string(1), df, col.names=colnames(df), col.tooltips=FALSE, class="simple-table", format.values = TRUE, wrap=FALSE, signif.digits=8, round.digits=8, row.data = list(rowid = seq_len(NROW(df)))) {
   restore.point("simpeleTable")
   n = NROW(df)
 
@@ -58,7 +58,7 @@ simpleTable = function(id, df, col.names=colnames(df), col.tooltips=FALSE, class
   main = eval(parse(text=code))
 
   #cols =  paste0(rep("<col>",NCOL(df)), collapse="")
-  tab = paste0('<table id="',id,'" class="', class,'">\n',head, main, "\n</table>")
+  tab = paste0('<table id="',id,'" class="', class,'">\n <thead>\n',head,'\n</thead>\n<tbody>', main, "\n</tbody>\n</table>")
   tab
 
 }

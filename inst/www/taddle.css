@@ -41,20 +41,16 @@
   text-align: left;
 }
 
-.rank-table tbody>tr:last-child td {
+
+.rank-table tbody>tr:last-child td, , .simple-table  tbody>tr:last-child td{
   border-bottom: solid 1px black;
 }
 
-
-.rank-table tr.sel-row td{
-  background: #FF8;
-}
-
-.rank-table tr:nth-child(even) {
+.rank-table tr:nth-child(even), .simple-table tr:nth-child(even) {
   background: #DDD
 }
 
-.rank-table tr.sel-row td{
+.rank-table tr.sel-row td, .simple-table tr.sel-row td{
   background: #FF8 !important;
 }
 
@@ -83,3 +79,38 @@
 	overflow-x: auto;
 }
 
+.simple-table td{
+  border-left: solid 1px black;
+  border-right: solid 1px black;
+  border-top: solid 1px black;
+  margin: 0px 3px 1px 3px;
+  padding: 1px 3px 1px 3px;
+  text-align: left;
+  font-size: 80%;
+}
+
+.simple-table th {
+  border-left: solid 1px black;
+  border-right: solid 1px black;
+  border-top: solid 1px black;
+  margin: 0px 3px 1px 3px;
+  padding: 1px 3px 1px 3px;
+  text-align: center;
+  font-size: 80%;
+}
+
+.simple-table  tbody>tr:last-child td{
+  border-bottom: solid 1px black;
+}
+
+.count-table th.col-1 {
+  border-right: solid 0px black;
+}
+.count-table th.col-2 {
+  border-left: solid 0px black;
+}
+
+.count-table .col-1 {
+  font-weight: bold;
+  //font-size: 100%;
+}

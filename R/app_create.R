@@ -93,7 +93,8 @@ new.step2.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
     ),
     selectInput("method","Allocation Method", methods),
     uiOutput("methodDescr"),
-
+    selectInput("random_order", "How are topics shown?",list("Show topics in random order to students"=TRUE, "Show topics in the original to students"=FALSE)),
+    helpText("Showing topics in random order may facilitate more diversification in students rankings."),
     textInput("email","Your Email"),
     checkboxInput("agree","I agree that anonymized data of the allocation task can be used and shared for research purposes.",value = FALSE),
     uiOutput("newSubmitAlert"),
@@ -114,6 +115,7 @@ new.step2.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
     tat$deadlineTime = formValues$deadlineTime
     tat$method = formValues$method
     tat$agree = formValues$agree
+    tat$random_order = formValues$random_order
 
     tat$title = formValues$titleInput
     tat$topic.text = formValues$topicsInput
@@ -135,6 +137,67 @@ new.step2.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
   setUI("methodDescr",withMathJaxNoHeader(HTML(m$descr)))
   ui
 }
+
+new.step2.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
+  restore.point("new.step2.ui")
+  methods = names(glob$methods)
+  names(methods) = sapply(glob$methods, function(m) m$title)
+  #methods = c(list("Choose matching method later"="no"), methods)
+
+  ui = tagList(
+    h3("Step 2"),
+    p("Deadline until students can enter their preferences:"),
+    tags$table(
+      tags$td(shiny::dateInput("deadlineDate","Deadline Date", value=tat$deadline.date)),
+      tags$td(style="padding-left: 2em;", simpleTimeInput("deadlineTime", "Deadline Time", width="12em", value=tat$deadline.time))
+    ),
+    selectInput("method","Allocation Method", methods),
+    uiOutput("methodDescr"),
+    selectInput("random_order", "How are topics shown?",list("Show topics in random order to students"=TRUE, "Show topics in the original to students"=FALSE)),
+    helpText("Showing topics in random order may facilitate more diversification in students rankings."),
+    textInput("email","Your Email"),
+    checkboxInput("agree","I agree that anonymized data of the allocation task can be used and shared for research purposes.",value = FALSE),
+    uiOutput("newSubmitAlert"),
+
+    simpleButton("back2Btn","Back", form.ids = c("deadlineDate","deadlineTime","method","email", "agree")),
+    simpleButton("createTatBtn","Create the Allocation Task", form.ids = c("deadlineDate","deadlineTime","method","email","agree", "topicsInput", "titleInput"))
+  )
+
+  buttonHandler("back2Btn", function(formValues, ...,tat=app$tat, app=getApp()) {
+    restore.point("back2Btn")
+    show.step.ui(1)
+  })
+
+  buttonHandler("createTatBtn", function(formValues, ...,tat=app$tat, app=getApp()) {
+    restore.point("createTatBtn")
+    tat$email = formValues$email
+    tat$deadlineDate = formValues$deadlineDate
+    tat$deadlineTime = formValues$deadlineTime
+    tat$method = formValues$method
+    tat$agree = formValues$agree
+    tat$random_order = formValues$random_order
+
+    tat$title = formValues$titleInput
+    tat$topic.text = formValues$topicsInput
+    tat$topics = parse.topic.text(tat$topic.text)
+    tat$num.topics = length(tat$topics)
+
+    submit.new.tat(tat)
+
+  })
+
+  selectChangeHandler("method", function(value,...){
+    restore.point("allocMethodChange")
+    tat$method = value
+    m = glob$methods[[tat$method]]
+    setUI("methodDescr",withMathJaxNoHeader(HTML(m$descr)))
+  })
+
+  m = glob$methods[[tat$method]]
+  setUI("methodDescr",withMathJaxNoHeader(HTML(m$descr)))
+  ui
+}
+
 
 submit.new.tat = function(..., tat=app$tat, app=getApp(), glob=app$glob) {
   restore.point("submit.new.tat")
@@ -165,10 +228,19 @@ submit.new.tat = function(..., tat=app$tat, app=getApp(), glob=app$glob) {
     dbInsert(glob$db, "topic", tops)
   })
 
+  log.action("submit_tat", method=tat$method)
 
-  cat("\nNew tat was inserted")
-
-
+  rank.url = paste0(app$glob$base.url,"?rank=", tat$rankkey)
+  res.url = paste0(app$glob$base.url,"?key=", tat$tatid)
+  ui = tagList(
+    h4("The allocation task has been generated"),
+    p("Please inform your students that they can now enter their ranking of topics under the following link:"),
+    tags$a(href=rank.url, target="_blank", rank.url),
+    br(),p("You see the results under the following link:"),
+    tags$a(href=res.url, target="_blank", res.url),
+    br(),p("We have also send you an email with this information.")
+  )
+  setUI("newSubmitAlert", ui)
 }
 
 
@@ -201,3 +273,5 @@ verify.tat = function(tat) {
   return(list(ok=TRUE))
 
 }
+
+

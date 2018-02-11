@@ -45,3 +45,8 @@ costmin_cubic:
     1. Each Student ranks all topics    
     
     2. If a student $i$ is assigned a topic $t$, she ranks at position $p_{it}$, we assign to this match a cost of $c_{it}=p_{it}^3$. The algorithm finds that allocation that minimizes the sum of costs over all students.
+
+costmin_3_5:
+  title: 'Cost Minimization (3-5)'
+  descr: |
+    Cost minimization trying to give each student a topic among her top 3, or at least among her top 5. That may not always be feasible, however.

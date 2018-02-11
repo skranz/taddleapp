@@ -10,4 +10,5 @@ License: GPL >= 2.0
 LazyData: TRUE
 Depends: stringtools, restorepoint, dplyr, tidyr, clue,
          shiny, shinyEvents, shinyEventsUI, rmdtools,
-         shinyEventsLogin, shinythemes, webforms, lubridate
+         shinyEventsLogin, shinythemes, webforms, lubridate,
+         officer, sparkline

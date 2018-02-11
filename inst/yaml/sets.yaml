@@ -2,4 +2,5 @@ method:
   'Truthful Revelation: Random Serial Dictatorship': serialdict
   'Cost Minimization (linear)': costmin_lin
   'Cost Minimization (quadratic)': costmin_quad
+  'Cost Minimization (3-5)': costmin_3_5
   'Cost Minimization (cubic)': costmin_cubic

@@ -29,15 +29,22 @@ example.algos = function() {
 #' @param prefs A matrix row=students cols=topics
 #' @param prios A list of priorities for each student
 #' @return A vector with the assigned object for each student. NA means the student did not get an object
-serial.dictator.alloc = function(prefs, prios = runif(NROW(prefs))) {
+serial.dictator.alloc = function(prefs, prios = runif(NROW(prefs)), return.pref.ind = TRUE) {
   restore.point("serial.dictator.alloc")
   n = length(prios)
+  T = NCOL(prefs)
   topics = sort(unique(as.vector(na.omit(prefs))))
+
   ord = order(-prios)
+  # get the person orders
+  pers = 1:n
+  pers[ord] = 1:n
+
   res = integer(n)
+
   i = 1
-  for (i in ord) {
-    found = intersect(prefs[i,],topics)[1]
+  for (i in pers) {
+    found = topics[which.min(prefs[i, topics])]
     res[i] = found
     topics = setdiff(topics, found)
   }
@@ -140,5 +147,6 @@ assignment.problem.alloc = function(prefs, rank.costs=seq_len(max(prefs))^2, no.
   }
   res = solve_LSAP(costs)
   res[res>T] = NA
-  as.integer(res)
+  topic = as.integer(res)
+  topic
 }

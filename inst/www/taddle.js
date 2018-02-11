@@ -154,3 +154,15 @@ get_rank_table_ranks = function() {
   });
   return ranks;
 }
+
+
+$('body').on('click', '#counts-table tbody tr',function(e){
+  var id = "counts-table";
+  var tr = $($(e.target).closest("tr"));
+  $("#"+id).find("tr").removeClass("sel-row");
+  tr.addClass("sel-row");
+
+  Shiny.onInputChange("countsTableRowClick", {eventId: "countsTableRowClick", id: e.target.id, value: tr.data("rowid"), data: tr.data(),nonce: Math.random()});
+
+
+});
