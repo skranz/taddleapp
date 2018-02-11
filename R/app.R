@@ -15,6 +15,7 @@ taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), email.sen
 
   glob$base.url = base.url
   glob$email.sender = email.sender
+  glob$smpt.server = smtp.server
   glob$taddle.dir = taddle.dir
   glob$db.dir = db.dir
 
