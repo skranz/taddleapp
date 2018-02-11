@@ -4,7 +4,9 @@ examples.taddleApp = function() {
   setwd("D:/libraries/taddle/")
 
   app = taddleApp("D:/libraries/taddle/shared")
-  viewApp(app, url.args = list(key="wBHxoAvHhvqVTYeHNtwa"))
+  #viewApp(app, url.args = list(key="wBHxoAvHhvqVTYeHNtwa"))
+  viewApp(app, url.args = list(key="FqAbbMrWWuQzgmYYccVS"))
+
   viewApp(app)
 
   create.random.ranks("zdaqjj", common.weight = 0.25,n = 10)
@@ -22,13 +24,25 @@ show.res.ui = function(tat = app$tat, app=getApp(),...) {
 
 res.home.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
   restore.point("res.home.ui")
-  diff.str = duration.string(Sys.time(),tat$deadline)
+
+  has.deadline = !is.empty.val(tat$deadline)
+  diff.str = if (has.deadline) duration.string(Sys.time(),tat$deadline)
+
+  if (is.null(tat$allocs)) {
+    ui = tagList(
+      h4(paste0(tat$title)),
+      if (has.deadline) p(HTML(paste0("Deadline: ", format(tat$deadline,"%A, %B %d at %H:%M"), " (",diff.str,")"))),
+      p(HTML("So far ", tat$num.sub, " submissions for ", tat$num.topics, " topics."))
+    )
+    return(ui)
+
+  }
 
   ct.ui = allocs.count.table.ui(tat)
 
   ui = tagList(
     h4(paste0(tat$title)),
-    p(HTML(paste0("Deadline: ", format(tat$deadline,"%A, %B %d at %H:%M"), " (",diff.str,")"))),
+    if (has.deadline) p(HTML(paste0("Deadline: ", format(tat$deadline,"%A, %B %d at %H:%M"), " (",diff.str,")"))),
     p(HTML("So far ", tat$num.sub, " submissions for ", tat$num.topics, " topics.")),
     h4("Overview of allocation mechanisms: Number of students who got their n'th ranked topic"),
     HTML(ct.ui),
@@ -128,6 +142,7 @@ allocs.count.table = function(tat=app$tat, app=getApp()) {
 
 compute.tat.allocations = function(tat=app$tat, app=getApp()) {
   restore.point("compute.tat.allocations")
+  if (NROW(tat$ras)==0) return(NULL)
   methods = unlist(app$glob$sets$method)
   allocs = bind_rows(lapply(methods, compute.tat.allocation, tat=tat))
   return(allocs)
