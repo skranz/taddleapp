@@ -108,7 +108,10 @@ show.rank.ui = function(tat = app$tat, app=getApp()) {
   }
   if (!is.empty.val(tat$deadline)) {
     if (tat$deadline < Sys.time()) {
-      ui = h4("Sorry, but the deadline for rankings has already passed.")
+      ui = tagList(
+        h4(tat$title),
+        p(paste0("Sorry, but the deadline ", format(tat$deadline)," for your ranking has already passed."))
+      )
       setUI("mainUI",ui)
       return()
 
@@ -116,8 +119,8 @@ show.rank.ui = function(tat = app$tat, app=getApp()) {
   }
 
 
-  if (is.null(tat$descr)) {
-    tat$descr = paste0("Please rank the topics for ", tat$title, " until <b>", format(tat$deadline,"%A, %B %d at %H:%M"),"</b>. Put your most preferred topic on top and your worst preferred topic on the bottom.")
+  if (is.empty.val(tat$descr)) {
+    tat$descr = paste0("Please rank the topics for ", tat$title, if(!is.empty.val(tat$deadline)) paste0(" until <b>", format(tat$deadline,"%A, %B %d at %H:%M"),"</b>"),". Put your most preferred topic on top and your worst preferred topic on the bottom.")
   }
 
   ui = tagList(
@@ -126,7 +129,7 @@ show.rank.ui = function(tat = app$tat, app=getApp()) {
     HTML(topic.rank.table(tat)),
     textInput("studname", "Your name:",value=stu$studname),
     textInput("studemail", "Your email:",value=stu$studemail),
-    helpText("To submit your ranking press the button below. You will still be able to change it afterwards."),
+    helpText("To submit your ranking, press the button below. You will still be able to change it afterwards."),
     uiOutput("rankAlert"),
     simpleButton("submitRankingBtn","Submit Ranking", form.ids = c("studname","studemail"))
   )
