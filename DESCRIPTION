@@ -11,4 +11,4 @@ LazyData: TRUE
 Depends: stringtools, restorepoint, dplyr, tidyr, clue,
          shiny, shinyEvents, shinyEventsUI, rmdtools,
          shinyEventsLogin, shinythemes, webforms, lubridate,
-         sparkline, sendmailR
+         sparkline, sendmailR, writexl
