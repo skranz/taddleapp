@@ -58,7 +58,7 @@ taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), email.sen
         app$tat = get.rank.tat(rankkey=query$rank)
         show.rank.ui()
       } else if (!is.null(query$crank)) {
-        app$tat = get.stud.tat(rankkey=query$crank)
+        app$tat = get.stud.tat(studkey=query$crank)
         show.rank.ui()
       } else if (!is.null(query$key)) {
         app$tat = get.res.tat(tatid=query$key)

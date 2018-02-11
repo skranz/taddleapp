@@ -213,8 +213,8 @@ submit.ranking = function(tat=app$tat, app=getApp(), glob=app$glob,...) {
     select(rank, topic)
 
   url = paste0(app$glob$base.url,"?crank=",stu$studkey)
-  body = paste0("Hello ", stu$studname,",\nyou just submitted your ranking of topics for '", tat$title,"'.\nIf you want to change your ranking ", if(!is.empty.val(tat$deadline)) paste0(" until the deadline ", format(tat$deadline,"%y-%m-%d %H:%M")), " use the following link:\n\n",url,"\n\nYour submitted ranking is as follows:\n\n", paste0(rato$rank,". ", rato$topic, collapse="\n"),
-    "\n\n---\nThis was an automatically generated email. Please don't reply.")
+  body = paste0("Hello ", stu$studname,",\n\nyou just submitted your ranking of topics for '", tat$title,"'.\nIf you want to change your ranking ", if(!is.empty.val(tat$deadline)) paste0(" until the deadline ", format(tat$deadline,"%y-%m-%d %H:%M")), " use the following link:\n\n",url,"\n\nYour submitted ranking is as follows:\n\n", paste0(rato$rank,". ", rato$topic, collapse="\n"),
+    "\n\n---\nThis is an automatically generated email. Please don't reply.")
 
   taddle.send.email(to=stu$studemail, subject = paste0(tat$title, ": Your Ranking of Topics"), body=body)
 
