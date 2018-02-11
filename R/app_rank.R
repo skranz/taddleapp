@@ -71,7 +71,7 @@ get.stud.tat = function(studkey, db=getApp()$glob$db) {
 
 
   ra = dbGet(db,"ranking", list(tatid=tatid, studemail=stu$studemail))
-  ra = left_join(ra, select(tops,pos,topic), by="pos")
+  ra = left_join(ra, select(tops,pos,topic), by="pos") %>% arrange(rank)
   stu$ra = ra
 
   ta$tops = tops
