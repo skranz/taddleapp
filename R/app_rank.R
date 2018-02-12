@@ -203,7 +203,7 @@ topic.rank.table = function(tat, app=getApp()) {
   downBtn[n] = ""
   #btns = paste0(upBtn, downBtn)
 
-  df = data_frame(rank = ra$rank,upBtn, downBtn, ra$topic)
+  df = data_frame(rank = ra$rank,upBtn, downBtn, htmlEscape(ra$topic))
   HTML(simpleTable(id="rank-table", df, class="rank-table", col.names = c("Rank","","", "Topic"), row.data=list(rowid = 1:n, pos=ra$pos)))
 
 }

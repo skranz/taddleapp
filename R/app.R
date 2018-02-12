@@ -91,7 +91,15 @@ about.ui = function() {
     h4("Who has created this website?"),
     HTML("Taddle has been created and is maintained by <a href='https://www.uni-ulm.de/mawi/mawi-wiwi/institut/mitarbeiter/skranz/' target = '_blank'>Sebastian Kranz, Ulm University</a>. It is part of a research project to study allocation methods."),
     h4("What does 'Taddle' mean?"),
-    p("The 'Ta' in Taddle stands for 'Topic Assignment'. The remaining letters have no meaning.")
+    p("The 'Ta' in Taddle stands for 'Topic Assignment'. The remaining letters have no meaning."),
+    h4("Impressum:"),
+    p("Sebastian Kranz"),
+    p("Universitaet Ulm, 89069 Ulm"),
+    p("Email: sebastian.kranz(at)uni-ulm.de"),
+    h4("Disclaimer:"),
+    p("THE WEBSITE IS CREATED IN THE HOPE THAT IT WILL BE USEFUL, BUT WITHOUT ANY WARRANTY. IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW THE AUTHOR WILL BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE WEBSITE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES), EVEN IF THE AUTHOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.")
+
+
   )
 
 }
