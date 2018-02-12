@@ -236,7 +236,7 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
 
   todf = select(todf, pos, topic, studname, rank, sl, studemail)
 
-  tohtml = rmdtools::html.table(todf,col.names = c("","Topic","Student","Ranked as","Topic Ranks","Email"))
+  tohtml = simpleTable(id="alloc-table", df=todf,wrap = TRUE, col.names = c("","Topic","Student","Ranked as","Topic Ranks","Email"))
 
   mlab = to.label(method, app$glob$sets$method)
   ui = tagList(
@@ -254,7 +254,8 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
       app=getApp()
       withProgress(message="Excel file is generated, please wait a moment...", {
         alloc.df = select(todf, Pos=pos, Topic=topic, Student=studname, Email=studemail, Rank=rank)
-        write_xlsx(list(allocation=alloc.df), file)
+        tabs = c(list(allocation=alloc.df), compute.ranking.df())
+        write_xlsx(tabs, file)
       })
       log.action("res_excel",method=tat$method)
     }
@@ -275,7 +276,6 @@ compute.ranking.df = function(tat=app$tat,  app=getApp()) {
     spread(key = rank, value = pos)
   colnames(mar)[-1] = paste0("Rank ", colnames(mar)[-1])
 
-  tat
-  tat$alloc
+  list("rank_by_topic"=mat, "topic_by_rank"=mar)
 
 }

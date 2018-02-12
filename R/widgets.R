@@ -10,7 +10,7 @@ simpleTimeInput = function(id,label=NULL, value="", width=NULL) {
 
 }
 
-simpleTable = function(id=random.string(1), df, col.names=colnames(df), col.tooltips=FALSE, class="simple-table", format.values = TRUE, wrap=FALSE, signif.digits=8, round.digits=8, row.data = list(rowid = seq_len(NROW(df)))) {
+simpleTable = function(id=random.string(1), df, col.names=colnames(df), col.tooltips=FALSE, class="simple-table", format.values = TRUE, wrap=TRUE, signif.digits=8, round.digits=8, row.data = list(rowid = seq_len(NROW(df)))) {
   restore.point("simpeleTable")
   n = NROW(df)
 
@@ -40,7 +40,7 @@ simpleTable = function(id=random.string(1), df, col.names=colnames(df), col.tool
     td.class[length(td.class)]="simple-td-bottom"
   }
 
-  nowrap = if (wrap) "" else "nowrap"
+  nowrap = if (wrap) "''" else "'nowrap'"
   cols = 1:NCOL(df)
   rows = seq_len(NROW(df))
 
