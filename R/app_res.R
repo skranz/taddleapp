@@ -4,14 +4,22 @@ examples.taddleApp = function() {
   setwd("D:/libraries/taddle/")
 
   app = taddleApp("D:/libraries/taddle/shared")
-  viewApp(app, url.args = list(key="TtzBnpsoUyqtMEMukahn"))
+  viewApp(app, url.args = list(key="hXXloQqbqJeRYKtMkSDm"))
 
   viewApp(app)
 
-  create.random.ranks("zdaqjj", common.weight = 0.25,n = 10)
+  create.random.ranks("cmevtq", common.weight = 0.30,n = 5)
 }
 
 show.res.ui = function(tat = app$tat, app=getApp(),...) {
+
+  if (is.null(tat)) {
+    ui = tagList(p("Your key does not refer to an existing allocation task."))
+    setUI("mainUI", ui)
+    return()
+  }
+
+
   ui = navlistPanel(id="mainPanel",
     tabPanel("Status",value="home", res.home.ui()),
     tabPanel("About", about.ui()),
@@ -70,8 +78,11 @@ res.home.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
 
 get.res.tat = function(tatid, db=getApp()$glob$db) {
   restore.point("get.res.tat")
-  tat = dbGet(db,"tat", list(tatid=tatid))
+  tat = dbGet(db,"tat", list(tatid=tatid),empty.as.null = TRUE)
+  if (is.null(tat)) return(NULL)
+
   tat = as.list(tat[1,])
+
 
   tops = dbGet(db, "topic",list(tatid=tatid))
   stu = dbGet(db, "student", list(tatid=tatid))
@@ -192,9 +203,11 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
   alloc = filter(tat$allocs, method==.method) %>%
     arrange(pos) %>% left_join(tat$stu, by="studemail")
 
-  todf = select(alloc, pos, topic, studname, rank)
+  todf = left_join(select(tat$tops,pos, topic), select(alloc,-topic),by="pos") %>%
+    select(pos, topic, studname, rank, studemail)
 
   todf$studname = htmlEscape(todf$studname)
+  todf$studemail = htmlEscape(todf$studemail)
 
   # Create sparklines
   ras = tat$ras
@@ -215,9 +228,15 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
   todf$topic[na.rows] = "-No Topic-"
   todf$pos[na.rows] = ""
   todf$rank[na.rows] = ""
+  na.rows = which(is.na(todf$studname))
+  todf$studname[na.rows] = ""
+  todf$studemail[na.rows] = ""
+  todf$rank[na.rows] = ""
 
 
-  tohtml = rmdtools::html.table(todf,col.names = c("","Topic","Student","Ranked as","Topic Ranks"))
+  todf = select(todf, pos, topic, studname, rank, sl, studemail)
+
+  tohtml = rmdtools::html.table(todf,col.names = c("","Topic","Student","Ranked as","Topic Ranks","Email"))
 
   mlab = to.label(method, app$glob$sets$method)
   ui = tagList(
@@ -234,7 +253,7 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
       restore.point("downloadTopics")
       app=getApp()
       withProgress(message="Excel file is generated, please wait a moment...", {
-        alloc.df = select(alloc, Pos=pos, Topic=topic, Student=studname, Email=studemail, Rank=rank)
+        alloc.df = select(todf, Pos=pos, Topic=topic, Student=studname, Email=studemail, Rank=rank)
         write_xlsx(list(allocation=alloc.df), file)
       })
       log.action("res_excel",method=tat$method)
@@ -242,4 +261,21 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
   )
 
   ui
+}
+
+compute.ranking.df = function(tat=app$tat,  app=getApp()) {
+  ras = tat$ras
+  mat = ras %>% select(studemail, rank, pos) %>%
+    arrange(studemail,pos) %>%
+    spread(key = pos, value = rank)
+  colnames(mat)[-1] = paste0("Topic ", colnames(mat)[-1])
+
+  mar = ras %>% select(studemail, rank, pos) %>%
+    arrange(studemail,rank) %>%
+    spread(key = rank, value = pos)
+  colnames(mar)[-1] = paste0("Rank ", colnames(mar)[-1])
+
+  tat
+  tat$alloc
+
 }

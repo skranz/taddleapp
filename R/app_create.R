@@ -133,7 +133,7 @@ new.step3.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
     uiOutput("newSubmitAlert"),
 
     simpleButton("back3Btn","Back", form.ids = c("deadline_date","deadline_time","method","email", "agree")),
-    simpleButton("createTatBtn","Create the Allocation Task", form.ids = c("deadline_date","deadline_time","method","email","agree", "random_order", "topicsInput", "titleInput"))
+    simpleButton("createTatBtn","Create the Allocation Task", form.ids = c("deadline_date","deadline_time","method","email","agree", "random_order", "topicsInput", "titleInput","multilineTopics"))
   )
 
   buttonHandler("back3Btn", function(formValues, ...,tat=app$tat, app=getApp()) {
@@ -143,6 +143,9 @@ new.step3.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
 
   buttonHandler("createTatBtn", function(formValues, ...,tat=app$tat, app=getApp()) {
     restore.point("createTatBtn")
+
+    multi.line = formValues$multilineTopics
+
     tat$email = formValues$email
     tat$deadline_date = formValues$deadline_date
     tat$deadline_time = formValues$deadline_time
@@ -152,7 +155,7 @@ new.step3.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
 
     tat$title = formValues$titleInput
     tat$topic.text = formValues$topicsInput
-    tat$topics = parse.topic.text(tat$topic.text)
+    tat$topics = parse.topic.text(tat$topic.text,multi.line = multi.line)
     tat$num.topics = length(tat$topics)
 
     submit.new.tat(tat)
@@ -220,7 +223,16 @@ submit.new.tat = function(..., tat=app$tat, app=getApp(), glob=app$glob) {
 parse.topic.text = function(topic.text, multi.line = FALSE) {
   restore.point("parse.topic.text")
   txt = str_trim(sep.lines(topic.text))
-  txt = txt[nchar(txt)>0]
+  if (!multi.line) {
+    txt = txt[nchar(txt)>0]
+
+  # Multiline topics
+  } else {
+    txt[txt==""] = "\n"
+    txt = paste0(txt, collapse=" ")
+    txt = str_trim(sep.lines(txt))
+    txt = txt[nchar(txt)>0]
+  }
   txt
 }
 
