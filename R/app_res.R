@@ -8,7 +8,14 @@ examples.taddleApp = function() {
 
   viewApp(app)
 
-  create.random.ranks("edtnlp", common.weight = 0.30,n = 5)
+  create.random.ranks("edtnlp", common.weight = 0.30,n = 10)
+
+
+  app = taddleApp("D:/libraries/taddle/shared")
+  create.random.ranks("zigzzd", common.weight = 0.30,n = 10)
+  viewApp(app, url.args = list(key="yNDwvLZEJgpMvEbnXavy"))
+
+
 }
 
 show.res.ui = function(tat = app$tat, app=getApp(),...) {
@@ -39,7 +46,7 @@ res.home.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
     ui = tagList(
       h4(paste0(tat$title)),
       if (has.deadline) p(HTML(paste0("Deadline: ", format(tat$deadline,"%A, %B %d at %H:%M"), " (",diff.str,")"))),
-      p(HTML("So far ", tat$num.sub, " submissions for ", tat$num.topics, " topics."))
+      p(HTML(paste0("So far ", tat$num.sub, " submissions for ", tat$num.topics, " topics", if(tat$num.slots != tat$num.topics) paste0(" with a total of ", tat$num.slots, " slots.") )))
     )
     return(ui)
 
@@ -50,7 +57,7 @@ res.home.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
   ui = tagList(
     h4(paste0(tat$title)),
     if (has.deadline) p(HTML(paste0("Deadline: ", format(tat$deadline,"%A, %B %d at %H:%M"), " (",diff.str,")"))),
-    p(HTML("So far ", tat$num.sub, " submissions for ", tat$num.topics, " topics.")),
+    p(HTML(paste0("So far ", tat$num.sub, " submissions for ", tat$num.topics, " topics", if(tat$num.slots != tat$num.topics) paste0(" with a total of ", tat$num.slots, " slots.") ))),
     h4("Overview of allocation mechanisms: Number of students who got their n'th ranked topic"),
     HTML(ct.ui),
     helpText("Click on a row to see the details of the allocation."),
@@ -84,7 +91,7 @@ get.res.tat = function(tatid, db=getApp()$glob$db) {
   tat = as.list(tat[1,])
 
 
-  tops = dbGet(db, "topic",list(tatid=tatid))
+  tops = dbGet(db, "topic",list(tatid=tatid)) %>% arrange(pos)
   stu = dbGet(db, "student", list(tatid=tatid))
   ras = dbGet(db, "ranking", list(tatid=tatid))
   ras = left_join(ras, select(stu, studemail, studname), by="studemail")
@@ -95,6 +102,8 @@ get.res.tat = function(tatid, db=getApp()$glob$db) {
 
   tat$num.sub = NROW(tat$stu)
   tat$num.topics = NROW(tops)
+  tat$num.slots = sum(tops$slots)
+
 
   tat$allocs =compute.tat.allocations(tat)
 
@@ -127,6 +136,7 @@ allocs.count.table.ui = function(tat=app$tat, app=getApp()) {
   }))
 
   df = select(df, method, sl, everything())
+
 
   html = simpleTable(id="counts-table",class="simple-table count-table", df=df,col.names = c("","", paste0("Rank ", colnames(mat[,-(1), drop=FALSE]))) )
   HTML(html)
@@ -168,30 +178,33 @@ compute.tat.allocation = function(method = "costmin_lin", tat) {
   T = max(ras$pos)
 
 
-
+  slots = tat$tops$slots
   prefs = matrix(ras$rank, nrow=n, ncol=T, byrow = TRUE)
 
   if (method == "serialdict") {
-    alloc = serial.dictator.alloc(prefs)
+    alloc = serial.dictator.alloc(prefs, slots = slots)
     restore.point("serialdict.alloc")
   } else if (method == "costmin_lin") {
-    alloc = assignment.problem.alloc(prefs,rank.costs = (1:T)^(1.01))
+    alloc = assignment.problem.alloc(prefs,rank.costs = (1:T)^(1.01), slots=slots)
   } else if (method == "costmin_quad") {
-    alloc = assignment.problem.alloc(prefs,rank.costs = (1:T)^2)
+    alloc = assignment.problem.alloc(prefs,rank.costs = (1:T)^2, slots=slots)
   } else if (method == "costmin_cubic") {
-    alloc = assignment.problem.alloc(prefs,rank.costs = (1:T)^3)
+    alloc = assignment.problem.alloc(prefs,rank.costs = (1:T)^3, slots=slots)
   } else if (method == "costmin_3_5") {
     costs = (1:T)^1.01
     if (T>3) costs[4] = 1000
     if (T>4) costs[5] = 1050
     if (T>5) costs[6:T] = costs[6:T]*10000
 
-    alloc = assignment.problem.alloc(prefs,rank.costs = costs)
+    alloc = assignment.problem.alloc(prefs,rank.costs = costs, slots)
   }
   rank = prefs[cbind(1:n,alloc)]
-  topics = arrange(tat$tops, pos)$topic
+  topics = tat$tops$topic
 
-  res = data_frame(method = method, studemail=studs,rank=rank, pos=alloc, topic=topics[pos])
+  res = data_frame(method = method, studemail=studs,rank=rank, pos=alloc, topic=topics[alloc], slots=slots[alloc]) %>%
+    group_by(pos) %>%
+    mutate(filled_slots = n()) %>%
+    ungroup()
 
   res
 }
@@ -203,8 +216,9 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
   alloc = filter(tat$allocs, method==.method) %>%
     arrange(pos) %>% left_join(tat$stu, by="studemail")
 
-  todf = left_join(select(tat$tops,pos, topic), select(alloc,-topic),by="pos") %>%
-    select(pos, topic, studname, rank, studemail)
+  todf = full_join(select(tat$tops,pos, topic), select(alloc,-topic),by="pos") %>%
+    mutate(slots = paste0(filled_slots, " of ", slots)) %>%
+    select(pos, topic, studname, rank, studemail, slots)
 
   todf$studname = htmlEscape(todf$studname)
   todf$studemail = htmlEscape(todf$studemail)
@@ -215,28 +229,39 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
   cc = rep("blue", max.rank)
   todf$sl = ""
 
-  todf$sl[!is.na(todf$pos)] = unlist(lapply(setdiff(unique(todf$pos),NA), function(.pos) {
-    #restore.point("jhkjahdkjshkfh")
-    ranks = filter(ras, pos==.pos)$rank
+  rows = which(!is.na(todf$pos))
+  .pos = 0
+  for (row in rows) {
+    if (.pos != todf$pos[row]) {
+      .pos = todf$pos[row]
+      ranks = filter(ras, pos==.pos)$rank
+      tabs = tabulate.to(ranks,max.rank)
+    }
     ccn = cc
-    row = which(todf$pos == .pos)
     ccn[todf$rank[row]] = "red"
-    spk_chr(tabulate.to(ranks,max.rank),chartRangeMin=0, type="bar", colorMap = ccn, tooltipFormat = '{{value}} ranked as 1+{{offset}}')
-  }))
+    todf$sl[row]  = spk_chr(tabs,chartRangeMin=0, type="bar", colorMap = ccn, tooltipFormat = '{{value}} ranked as 1+{{offset}}')
+  }
 
   na.rows = which(is.na(todf$pos))
   todf$topic[na.rows] = "-No Topic-"
   todf$pos[na.rows] = ""
   todf$rank[na.rows] = ""
+  todf$slots[na.rows] = ""
   na.rows = which(is.na(todf$studname))
   todf$studname[na.rows] = ""
   todf$studemail[na.rows] = ""
   todf$rank[na.rows] = ""
 
 
-  todf = select(todf, pos, topic, studname, rank, sl, studemail)
+  if (any(is.true(alloc$slots>1))) {
+    todf = select(todf, pos, topic, studname, rank, sl, studemail, slots)
+    col.names = c("","Topic","Student","Ranked as","Topic Ranks","Email", "Slots")
+  } else {
+    todf = select(todf, pos, topic, studname, rank, sl, studemail)
+    col.names = c("","Topic","Student","Ranked as","Topic Ranks","Email")
 
-  tohtml = simpleTable(id="alloc-table", df=todf,wrap = TRUE, col.names = c("","Topic","Student","Ranked as","Topic Ranks","Email"))
+  }
+  tohtml = simpleTable(id="alloc-table", df=todf,wrap = TRUE, col.names = col.names)
 
   mlab = to.label(method, app$glob$sets$method)
   ui = tagList(
@@ -253,7 +278,11 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
       restore.point("downloadTopics")
       app=getApp()
       withProgress(message="Excel file is generated, please wait a moment...", {
-        alloc.df = select(todf, Pos=pos, Topic=topic, Student=studname, Email=studemail, Rank=rank)
+        if (any(is.true(alloc$slots>1))) {
+          alloc.df = select(todf, Pos=pos, Topic=topic, Student=studname, Email=studemail, Rank=rank, Topic_Filled_Slots=slots)
+        } else {
+          alloc.df = select(todf, Pos=pos, Topic=topic, Student=studname, Email=studemail, Rank=rank)
+        }
         tabs = c(list(allocation=alloc.df), compute.ranking.df())
         write_xlsx(tabs, file)
       })
