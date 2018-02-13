@@ -2,7 +2,7 @@ examples.taddleApp = function() {
   restore.point.options(display.restore.point=TRUE)
   setwd("D:/libraries/taddle/")
   app = taddleApp("D:/libraries/taddle/shared")
-  viewApp(app, url.args = list(rank="dobsvw"))
+  viewApp(app, url.args = list(rank="edtnlp"))
   viewApp(app, url.args = list(crank="BFfOtPbWhBvUtuqYZLGw"))
 
 
@@ -204,6 +204,7 @@ topic.rank.table = function(tat, app=getApp()) {
   #btns = paste0(upBtn, downBtn)
 
   df = data_frame(rank = ra$rank,upBtn, downBtn, htmlEscape(ra$topic))
+
   HTML(simpleTable(id="rank-table", df, class="rank-table", col.names = c("Rank","","", "Topic"), row.data=list(rowid = 1:n, pos=ra$pos)))
 
 }

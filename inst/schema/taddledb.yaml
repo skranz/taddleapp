@@ -14,6 +14,7 @@ tat:
     deadline_type: CHARACTER(2)
     random_order: BOOLEAN
     descr: TEXT
+    def_slots: INTEGER
     status: CHARACTER(2)
     create_time: DATETIME
 
@@ -22,6 +23,7 @@ topic:
     tatid: CHARACTER(20)
     pos: INTEGER
     topic: TEXT
+    slots: INTEGER
 
 student:
   table:

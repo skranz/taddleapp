@@ -23,6 +23,11 @@
 
 }
 
+tr.create-options .checkbox {
+  margin-top: 0px;
+  margin-bottom: 5px;
+}
+
 .rank-table th {
   font-weight: bold;
   margin: 3px;
@@ -49,8 +54,12 @@
   border-bottom: solid 1px black;
 }
 
-.rank-table tr:nth-child(even), .simple-table tr:nth-child(even) {
+.rank-table tr:nth-child(odd), .simple-table tr:nth-child(odd) {
   background: #DDD
+}
+
+.rank-table th, .simple-table th {
+  background: #FFF
 }
 
 .rank-table tr.sel-row td, .simple-table tr.sel-row td{

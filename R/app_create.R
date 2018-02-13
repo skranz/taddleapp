@@ -35,41 +35,40 @@ new.home.ui = function(..., app=getApp(), glob=app$glob) {
 }
 
 empty.tat = function(...) {
-  as.environment(list(new=TRUE, key = random.string(), topic.text="Example Topic 1\nExample Topic 2\nExample Topic 3", topics=c("Example Topic 1", "Example Topic 2", "Example Topic 3"), num.topics=0, method="no", multiline=FALSE, deadline_date = NA, deadline_time="23:59", deadline_type="", email=NULL, random_order=TRUE, status="", descr="" ))
+  as.environment(list(new=TRUE, key = random.string(), topic.text="Example Topic 1\nExample Topic 2\n#2 Example Topic 3 (Two Slots)", topics=c("Example Topic 1", "Example Topic 2", "Example Topic 3 (Two Slots)"), slots=c(1,1,2), num.topics=0, def_slots=1, method="no", multiline=FALSE, deadline_date = NA, deadline_time="23:59", deadline_type="", email=NULL, random_order=TRUE, status="", descr="" ))
 }
 
 new.step1.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
   restore.point("show.new.alloc1")
 
   topics.ui = tagList(
-    h4(length(tat$topics), " topics parsed"),
-    tags$ol(HTML(paste0("<li>", tat$topics,"</li>")))
+    tags$b(length(tat$topics), " topics parsed"),
+    parsed.topic.table(tat)
   )
-  ui = tagList(
-    fluidRow(column(10, offset=0,
-    div(
-      div(id="new-alloc-1",
-        h3("Step 1: Enter Seminar Title and Topics"),
-        textInput("titleInput","Seminar Title",value = tat$title, width="50em"),
-        helpText("Simply enter or copy your topics in your text field below. Each topic should be on a new line. You can leave empty lines between topics."),
-        tags$table(style="width: 100%", tags$tr(
-          tags$td(style="width: 60%", valign="top",
-            tagList(
-            textAreaInput("topicsInput","Topics",value = tat$topic.text, cols=60, rows=10, resize="both"),
-            checkboxInput("multilineTopics","Multiline topics separated by empty line.",value = tat$multiline)
-            )
-          ),
-          tags$td(style="width: 40%; padding-left: 3em",valign="top",
-            div(id="parsedTopics", style="max-height: 20em; overflow-y: auto;",
-              topics.ui
-            )
-          )
+  def_slots = 1:100
+  names(def_slots) = 1:100
 
-        )),
-        simpleButton("cont1Btn","Continue", form.ids = c("titleInput","topicsInput"))
+  ui = tagList(div(id="new-alloc-1",
+    h3("Step 1: Enter Seminar Title and Topics"),
+    textInput("titleInput","Seminar Title",value = tat$title, width="50em"),
+    helpText("Simply enter or copy your topics in your text field below. Each topic should be on a new line. You can leave empty lines between topics."),
+    tags$table(style="width: 100%",
+      tags$tr(
+        tags$td(style="width: 50%", valign="top",
+          textAreaInput("topicsInput","Topics",value = tat$topic.text, cols=60, rows=10, resize="both")
+        ),
+        tags$td(style="width: 50%; padding-left: 1em",valign="top", div(id="parsedTopics", style="max-height: 20em; overflow-y: auto;",
+            topics.ui
+          )
+        )
+      ),
+      tags$tr(class="create-options",
+        tags$td(valign="top", checkboxInput("multilineTopics","Multiline topics separated by empty line.",value = tat$multiline)),
+        tags$td(valign="top", tagList(HTML("Default no. of slots per topic:"), simpleSelect("def_slots","",choices=def_slots,selected = tat$def_slots,width = "4em")))
       )
-    )))
-  )
+    ),
+    simpleButton("cont1Btn","Continue", form.ids = c("titleInput","topicsInput"))
+  ))
 
   buttonHandler("cont1Btn", function(formValues, ...,tat=app$tat, app=getApp()) {
     restore.point("cont1Btn")
@@ -133,7 +132,7 @@ new.step3.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
     uiOutput("newSubmitAlert"),
 
     simpleButton("back3Btn","Back", form.ids = c("deadline_date","deadline_time","method","email", "agree")),
-    simpleButton("createTatBtn","Create the Allocation Task", form.ids = c("deadline_date","deadline_time","method","email","agree", "random_order", "topicsInput", "titleInput","multilineTopics"))
+    simpleButton("createTatBtn","Create the Allocation Task", form.ids = c("deadline_date","deadline_time","method","email","agree", "random_order", "topicsInput", "titleInput","multilineTopics","def_slots"))
   )
 
   buttonHandler("back3Btn", function(formValues, ...,tat=app$tat, app=getApp()) {
@@ -145,6 +144,7 @@ new.step3.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
     restore.point("createTatBtn")
 
     multi.line = formValues$multilineTopics
+    def_slots = as.integer(formValues$def_slots)
 
     tat$email = formValues$email
     tat$deadline_date = formValues$deadline_date
@@ -155,7 +155,10 @@ new.step3.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
 
     tat$title = formValues$titleInput
     tat$topic.text = formValues$topicsInput
-    tat$topics = parse.topic.text(tat$topic.text,multi.line = multi.line)
+    res = parse.topic.text(tat$topic.text,multi.line = multi.line, def_slots=def_slots)
+    tat$topics = res$topics
+    tat$slots = res$slots
+    tat$num.slots = sum(tat$slots)
     tat$num.topics = length(tat$topics)
 
     submit.new.tat(tat)
@@ -190,7 +193,7 @@ submit.new.tat = function(..., tat=app$tat, app=getApp(), glob=app$glob) {
   }
   tat$create_time = Sys.time()
 
-  tops = data_frame(tatid = tat$tatid, pos=seq_along(tat$topics), topic=tat$topics)
+  tops = data_frame(tatid = tat$tatid, pos=seq_along(tat$topics), topic=tat$topics, slots=tat$slots)
 
   # Insert dataset
   dbWithTransaction(glob$db,{
@@ -219,8 +222,18 @@ submit.new.tat = function(..., tat=app$tat, app=getApp(), glob=app$glob) {
   taddle.send.email(to=tat$email, subject = paste0("New Allocation Task: ", tat$title), body=body)
 }
 
+parsed.topic.table = function(tat) {
+  txt = paste0("<tr>",
+    "<td>",seq_along(tat$topics),"</td>",
+    "<td>",tat$slots,"</td>",
+    "<td>",tat$topics,"</td>",
+    "</tr>", collapse="\n"
+  )
+  txt = paste0("<table class='simple-table'><thead><th>Pos</th><th>Slots</th><th>Topic</th><tbody>",txt,"</tbody></table>")
+  HTML(txt)
+}
 
-parse.topic.text = function(topic.text, multi.line = FALSE) {
+parse.topic.text = function(topic.text, multi.line = FALSE, def_slots=1) {
   restore.point("parse.topic.text")
   txt = str_trim(sep.lines(topic.text))
   if (!multi.line) {
@@ -233,7 +246,18 @@ parse.topic.text = function(topic.text, multi.line = FALSE) {
     txt = str_trim(sep.lines(txt))
     txt = txt[nchar(txt)>0]
   }
-  txt
+  # Parse no of slots
+  slots = rep(def_slots, length(txt))
+  rows = which(str.starts.with(txt,"#"))
+  if (length(rows)>0) {
+    rslots = as.integer(str.between(txt[rows],"#"," "))
+    rows = rows[!is.na(rslots)]
+    rslots = rslots[!is.na(rslots)]
+    txt[rows] = str.trim(str.right.of(txt[rows]," "))
+    slots[rows] = rslots
+  }
+
+  list(topics=txt, slots=slots)
 }
 
 verify.tat = function(tat) {

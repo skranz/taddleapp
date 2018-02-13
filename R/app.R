@@ -78,12 +78,6 @@ show.step.ui = function(step = 1, app=getApp()) {
   updateNavlistPanel(app$session, "mainPanel", panel)
 }
 
-parse.topic.text = function(topic.text, multi.line = FALSE) {
-  restore.point("parse.topic.text")
-  txt = str_trim(sep.lines(topic.text))
-  txt = txt[nchar(txt)>0]
-  txt
-}
 
 about.ui = function() {
   ui = tagList(

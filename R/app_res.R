@@ -4,11 +4,11 @@ examples.taddleApp = function() {
   setwd("D:/libraries/taddle/")
 
   app = taddleApp("D:/libraries/taddle/shared")
-  viewApp(app, url.args = list(key="hXXloQqbqJeRYKtMkSDm"))
+  viewApp(app, url.args = list(key="MDZUsBlqHGsiLbihUEbH"))
 
   viewApp(app)
 
-  create.random.ranks("cmevtq", common.weight = 0.30,n = 5)
+  create.random.ranks("edtnlp", common.weight = 0.30,n = 5)
 }
 
 show.res.ui = function(tat = app$tat, app=getApp(),...) {
