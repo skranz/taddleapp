@@ -42,19 +42,26 @@ show.res.ui = function(tat = app$tat, app=getApp(),...) {
   setUI("resHomeUI",   res.home.ui())
 }
 
+res.show.deadline = function(tat=app$tat, app=getApp()) {
+  has.deadline = !is.empty.val(tat$deadline)
+  diff.str = if (has.deadline) duration.string(Sys.time(),tat$deadline)
+  html  = if (has.deadline) p(HTML(paste0("Deadline: ", format(tat$deadline,"%A, %B %d at %H:%M"), " (",diff.str,")")))
+
+  setUI("deadlineUI", html)
+}
 
 res.home.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
   restore.point("res.home.ui")
 
-  has.deadline = !is.empty.val(tat$deadline)
-  diff.str = if (has.deadline) duration.string(Sys.time(),tat$deadline)
 
+  num.inactive = sum(!tat$stu$active)
   if (is.null(tat$allocs)) {
     ui = tagList(
       h4(paste0(tat$title)),
-      if (has.deadline) p(HTML(paste0("Deadline: ", format(tat$deadline,"%A, %B %d at %H:%M"), " (",diff.str,")"))),
-      p(HTML(paste0("So far ", tat$num.sub, " submissions for ", tat$num.topics, " topics", if(tat$num.slots != tat$num.topics) paste0(" with a total of ", tat$num.slots, " slots.") )))
+      uiOutput("deadlineUI"),
+      p(HTML(paste0("So far ", tat$num.sub-num.inactive, " ", if(num.inactive>0) paste0(" active and ", num.inactive, " deactivated") ," submissions for ", tat$num.topics, " topics", if(tat$num.slots != tat$num.topics) paste0(" with a total of ", tat$num.slots, " slots.") )))
     )
+    res.show.deadline()
     return(ui)
 
   }
@@ -63,14 +70,15 @@ res.home.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
 
   ui = tagList(
     h4(paste0(tat$title)),
-    if (has.deadline) p(HTML(paste0("Deadline: ", format(tat$deadline,"%A, %B %d at %H:%M"), " (",diff.str,")"))),
-    p(HTML(paste0("So far ", tat$num.sub, " submissions for ", tat$num.topics, " topics", if(tat$num.slots != tat$num.topics) paste0(" with a total of ", tat$num.slots, " slots.") ))),
+    uiOutput("deadlineUI"),
+    p(HTML(paste0("So far ", tat$num.sub-num.inactive, " ", if(num.inactive>0) paste0(" active and ", num.inactive, " deactivated") ," submissions for ", tat$num.topics, " topics", if(tat$num.slots != tat$num.topics) paste0(" with a total of ", tat$num.slots, " slots.") ))),
     h4("Overview of allocation mechanisms: Number of students who got their n'th ranked topic"),
     HTML(ct.ui),
     helpText("Click on a row in the table above, to see the details of the allocation."),
     uiOutput("resUI")
     #uiOutput("optUI")
   )
+  res.show.deadline()
 
   eventHandler(eventId="countsTableRowClick", id=NULL,fun= function(value,data,...) {
     restore.point("countsTableRowClick")
@@ -209,7 +217,6 @@ compute.tat.allocation = function(method = "costmin_lin", tat) {
   fixed_stud = tat$stu$studemail[!is.na(tat$stu$fixed_pos)]
   fixed_stud = setdiff(fixed_stud, inactive)
 
-  fixed_pos = as.integer(na.omit(tat$stu$fixed_pos[tat$stu$active]))
 
 
   studs = setdiff(studs, c(inactive,fixed_stud))
@@ -222,6 +229,8 @@ compute.tat.allocation = function(method = "costmin_lin", tat) {
 
   # Substract slots from topics that have been
   # exogenously fixed for some students
+  rows = match(fixed_stud, tat$stu$studemail)
+  fixed_pos = tat$stu$fixed_pos[rows]
   minus.fixed.slots = tabulate.to(fixed_pos, NROW(tat$tops$slots))
   org.slots = tat$tops$slots
   slots = pmax(0,tat$tops$slots - minus.fixed.slots)
@@ -412,6 +421,7 @@ res.modify.ui = function(tat = app$tat, app=getApp()) {
     #simpleButton("saveResModBtn","Save Changes and Update Results",form.sel = ".slots-input, .active-checkbox"),
 
     p("You can change the deadline until students should enter their preferences:"),
+    uiOutput("deadlineModAlert"),
     tags$table(
       tags$td(shiny::dateInput("deadline_date","Deadline Date", value=tat$deadline_date)),
       tags$td(style="padding-left: 2em;", simpleTimeInput("deadline_time", "Deadline Time", width="12em", value=tat$deadline_time))
@@ -420,8 +430,23 @@ res.modify.ui = function(tat = app$tat, app=getApp()) {
     HTML(slots.tab),
     br(),
     tags$b("Deactivate students or fix topics:"),
-    HTML(studs.tab)
+    HTML(studs.tab),
+    p("Notes: If you fix a topic for a student, the student will still take up a slot.")
   )
+
+  changeHandler("deadline_date",fun=function(value,...) {
+    args = list(...)
+    restore.point("deadline_date_change")
+    tat$deadline_date = value
+    res.change.deadline()
+  })
+  idEventHandler("deadline_time",fun=function(value,...) {
+    args = list(...)
+    restore.point("deadline_time_change")
+    tat$deadline_time = value
+    res.change.deadline()
+  })
+
 
   classEventHandler("fix-topic-btn", event="click", function(id, ...) {
     args = list(...)
@@ -434,10 +459,10 @@ res.modify.ui = function(tat = app$tat, app=getApp()) {
       left_join(select(tat$tops, pos, topic),by="pos") %>%
       arrange(rank)
 
-    ra$taken = ra$pos %in% tat$stu$fixed_pos
+    #ra$taken = ra$pos %in% tat$stu$fixed_pos
 
     btns = simpleButtonVector(paste("fix-pos-", ra$pos), label="Choose",size = "sm", extra.class = "fix-pos-btn")
-    btns[ra$taken] = "Fixed for other student"
+    #btns[ra$taken] = "Fixed for other student"
 
     tab = simpleTable(id="fix-pos-table", df=data_frame(btns, ra$rank, ra$topic), col.names = c("","Rank","Topic"))
 
@@ -508,6 +533,40 @@ res.modify.ui = function(tat = app$tat, app=getApp()) {
 
 
   ui
+}
+
+res.change.deadline = function(tat = app$tat, app=getApp()) {
+  restore.point("res.change.deadline")
+
+  if (is.empty.val(tat$deadline_time) | is.empty.val(tat$deadline_date)) {
+    if (is.empty.val(tat$deadline)) return()
+
+    # Remove deadline
+    tat$deadline = NA
+    log.action("remove_deadline",org_deadline=format(tat$deadline))
+    tat$deadline = NA
+    dbUpdate(app$glob$db,"tat",list(deadline=tat$deadline), list(tatid=tat$tatid))
+    timedMessage("deadlineModAlert",colored.html(paste0("Deadline removed."), color="#0000cc"), millis=5000)
+    res.show.deadline()
+    return()
+  }
+
+  # Try to set new deadline
+  deadline = NA
+  try({deadline = as.POSIXct(paste0(tat$deadline_date," ", tat$deadline_time))})
+  if (is.na(deadline)) {
+    timedMessage("deadlineModAlert",colored.html("I could not parse your entered deadeline."), millis=5000)
+    return()
+  }
+  if(identical(deadline, tat$deadline))
+    return()
+
+  tat$deadline = deadline
+  log.action("set_deadline",deadline=format(tat$deadline))
+  dbUpdate(app$glob$db,"tat",list(deadline=tat$deadline), list(tatid=tat$tatid))
+  timedMessage("deadlineModAlert",colored.html(paste0("Deadline changed to ", format(tat$deadline)), color="#0000cc"), millis=5000)
+  res.show.deadline()
+
 }
 
 res.tab.change = function(value,...,tat=app$tat,app=getApp()) {
