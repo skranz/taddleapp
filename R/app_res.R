@@ -574,7 +574,7 @@ res.tab.change = function(value,...,tat=app$tat,app=getApp()) {
   cat("\nto tab ", value)
 
   if (value=="home" & isTRUE(app$updated.options)) {
-    app$update.options = FALSE
+    app$updated.options = FALSE
     tat$allocs =compute.tat.allocations(tat)
     ui = res.home.ui(tat=tat)
     setUI("resHomeUI",ui)
