@@ -6,8 +6,8 @@ examples.taddleApp = function() {
 }
 
 
-show.new.ui = function(...) {
-  ui = navlistPanel(id="mainPanel",
+show.new.ui = function(start.pane = "home",...) {
+  ui = navlistPanel(id="mainPanel", selected=start.pane,
     tabPanel("Taddle",value="home", new.home.ui()),
     tabPanel("Step 1 (Topics)",value="step1", new.step1.ui()),
     tabPanel("Step 2 (Customize)",value="step2", new.step2.ui()),
@@ -29,13 +29,16 @@ new.home.ui = function(..., app=getApp(), glob=app$glob) {
     )
   )
   buttonHandler("newAllocBtn", function(...) {
+    tat = as.environment(as.list(app$tat))
+    tat$new = TRUE
+    setUI("newSubmittAlert",NULL)
     show.step.ui(1)
   })
   setUI("mainUI", ui)
 }
 
 empty.tat = function(...) {
-  as.environment(list(new=TRUE, key = random.string(), topic.text="Example Topic 1\nExample Topic 2\n#2 Example Topic 3 (Two Slots)", topics=c("Example Topic 1", "Example Topic 2", "Example Topic 3 (Two Slots)"), slots=c(1,1,2), num.topics=0, def_slots=1, method="no", multiline=FALSE, deadline_date = NA, deadline_time="23:59", deadline_type="", email=NULL, random_order=TRUE, status="", descr="" ))
+  as.environment(list(new=TRUE, topic.text="Example Topic 1\nExample Topic 2\n#2 Example Topic 3 (Two Slots)", topics=c("Example Topic 1", "Example Topic 2", "Example Topic 3 (Two Slots)"), slots=c(1,1,2), num.topics=0, def_slots=1, method="no", multiline=FALSE, deadline_date = NA, deadline_time="23:59", deadline_type="", email=NULL, random_order=TRUE, status="", descr="", random.seed=sample.int(1e10,1)))
 }
 
 new.step1.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
@@ -174,18 +177,22 @@ submit.new.tat = function(..., tat=app$tat, app=getApp(), glob=app$glob) {
   if (!res$ok) {
     timedMessage("newSubmitAlert",colored.html(res$msg), millis=20000)
     return()
-  } else {
-    shinyEventsUI::errorMessage("newSubmitAlert","")
   }
-
-  if (!is.null(tat$tatid)) {
-    # Do something here
+  # Wait at least 10 seconds until create again
+  if (!is.null(app$last.create.time)) {
+    if (as.integer(Sys.time()-app$last.create.time)<=10)
     return()
   }
+
+  #if (!is.null(tat$tatid)) {
+    # Do something here
+  #  return()
+  #}
 
   tat$tatid = random.string(1,20)
   tat$rankkey = paste0(sample(letters,6, replace=TRUE), collapse="")
   tat$org_method = tat$method
+  tat$random_seed = sample.int(1e10,1)
   if (is.empty.val(tat$deadline_date)) {
     tat$deadline = NA
   } else {
@@ -220,6 +227,8 @@ submit.new.tat = function(..., tat=app$tat, app=getApp(), glob=app$glob) {
     "---\nThis is an automatically generated email. Please don't reply.")
 
   taddle.send.email(to=tat$email, subject = paste0("New Allocation Task: ", tat$title), body=body)
+
+  app$last.create.time = Sys.time()
 }
 
 parsed.topic.table = function(tat) {
