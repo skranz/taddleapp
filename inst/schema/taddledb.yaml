@@ -36,6 +36,13 @@ student:
     first_ranking: DATETIME
     last_ranking: DATETIME
     num_ranking: INTEGER
-    priority: DOUBLE
     active: BOOLEAN
     fixed_pos: INTEGER
+
+ranking:
+  table:
+    tatid: CHARACTER(20)
+    studemail: VARCHAR(50)
+    pos: INTEGER
+    shownpos: INTEGER
+    rank: INTEGER
