@@ -152,7 +152,7 @@ assignment.problem.alloc = function(prefs, rank.costs=seq_len(max(prefs))^2, slo
   if (multi.slot) {
 
     slot.cols = unlist(lapply(seq_along(slots), function(t) rep(t, slots[t])))
-    costs = costs[,slot.cols]
+    costs = costs[,slot.cols, drop=FALSE]
   }
 
   if (n>S) {

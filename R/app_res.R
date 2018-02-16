@@ -4,7 +4,7 @@ examples.taddleApp = function() {
   setwd("D:/libraries/taddle/")
 
   app = taddleApp("D:/libraries/taddle/shared")
-  viewApp(app, url.args = list(key="cCRAGQmDeYgikHBChjaA"))
+  viewApp(app, url.args = list(key="BCjCKvxfxEAkRJnaFvvs"))
 
   viewApp(app)
 
@@ -277,9 +277,10 @@ compute.tat.allocation = function(method = "costmin_lin", tat) {
     ungroup()
 
 
-  ia.res = data_frame(method=method, studemail=inactive, rank=NA, pos=NA, topic=NA, slots=NA, fixed=NA, filled_slots=NA)
-
-  res = rbind(res, ia.res)
+  if (length(inactive)>0) {
+    ia.res = data_frame(method=method, studemail=inactive, rank=NA, pos=NA, topic=NA, slots=NA, fixed=NA, filled_slots=NA)
+    res = rbind(res, ia.res)
+  }
 
   res
 }
