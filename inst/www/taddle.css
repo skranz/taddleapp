@@ -55,7 +55,7 @@ tr.create-options .checkbox {
 }
 
 .striped-table tr:nth-child(odd) {
-  background: #EDD
+  background: #EEE
 }
 
 .striped-table th {

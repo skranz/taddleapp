@@ -2,7 +2,7 @@ examples.taddleApp = function() {
   restore.point.options(display.restore.point=TRUE)
   setwd("D:/libraries/taddle/")
   app = taddleApp("D:/libraries/taddle/shared")
-  viewApp(app, url.args = list(rank="edtnlp"))
+  viewApp(app, url.args = list(rank="awzqut"))
   viewApp(app, url.args = list(crank="BFfOtPbWhBvUtuqYZLGw"))
 
 
@@ -95,7 +95,7 @@ empty.stu = function(tat) {
   ra = arrange(ra, rank)
 
 
-  stu = list(ra=ra,tatid=tat$tatid, studemail="", studname="", studkey="", num_ranking=0, last_ranking=NULL, first_ranking=NULL)
+  stu = list(ra=ra,tatid=tat$tatid, studemail="", studname="", studkey="", num_ranking=0, last_ranking=NULL, first_ranking=NULL, active=TRUE)
 
   stu
 }
