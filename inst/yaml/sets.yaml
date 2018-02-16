@@ -4,3 +4,30 @@ method:
   'Cost Minimization (quadratic)': costmin_quad
   'Cost Minimization (3-5)': costmin_3_5
   'Cost Minimization (cubic)': costmin_cubic
+
+options:
+  '': 'no'
+  'Deactivate Topics': da_top
+  'Deactivate Students': da_stu
+  'Fixed Topic-Student Match': match
+  'Adapt Slots': slots
+
+tattype:
+  'Seminar Topic Allocation': sta
+  'Different Allocation Problem': dap
+  'Just a test (no real allocation)': test
+
+tatsubjects:
+  'Economics (Micro)': micecon
+  'Economics (General)': econ
+  'Operations Research / Optimization': or
+  'Business Administration': ba
+  'Statistics': stat
+  'Computer Sciences': cs
+  'Mathematics': math
+  'Engineering': eng
+  'Natural Sciences & Medicine': natmed
+  'Social Sciences': so
+  'Humanities': hum
+  'Law': law
+  'Other': other

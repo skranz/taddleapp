@@ -10,7 +10,7 @@ simpleTimeInput = function(id,label=NULL, value="", width=NULL) {
 
 }
 
-simpleTable = function(id=random.string(1), df, col.names=colnames(df), col.tooltips=FALSE, class="simple-table", format.values = TRUE, wrap=TRUE, signif.digits=8, round.digits=8, row.data = list(rowid = seq_len(NROW(df)))) {
+simpleTable = function(id=random.string(1), df, col.names=colnames(df), col.tooltips=FALSE, class="simple-table", format.values = TRUE, wrap=TRUE, signif.digits=8, round.digits=8, row.data = list(rowid = seq_len(NROW(df))), sel.row=NULL, row.class=rep("", NROW(df))) {
   restore.point("simpeleTable")
   n = NROW(df)
 
@@ -52,8 +52,15 @@ simpleTable = function(id=random.string(1), df, col.names=colnames(df), col.tool
     str
   }
 
+  sel.row.class = NULL
+  if (!is.null(sel.row)) {
+    sel.row.class = rep("",NROW(df))
+    sel.row.class[sel.row] = " sel-row"
+  }
+
+
   code = paste0('"<td class=\\"",td.class," row-",rows," col-',cols,'\\" ", ', nowrap,', ">", my.format.vals(df[[',cols,']]),"</td>"', collapse=",")
-  code = paste0('paste0("<tr ',rdata,' class=\\"row-", rows,"\\">",',code,',"</tr>", collapse="\\n")')
+  code = paste0('paste0("<tr ',rdata,' class=\\"row-", rows, sel.row.class, " ", row.class, "\\">",',code,',"</tr>", collapse="\\n")')
   call = parse(text=code)
   main = eval(parse(text=code))
 
@@ -65,4 +72,58 @@ simpleTable = function(id=random.string(1), df, col.names=colnames(df), col.tool
 
 fontAwesomeHeader = function() {
   htmlDependency("font-awesome", "4.7.0", c(href = "shared/font-awesome"), stylesheet = "css/font-awesome.min.css")
+}
+
+tableSelectInputVector = function (inputId, choices, selected=1, width=NULL, value=NULL, extra.class = "", ...)  {
+  restore.point("selectizeInputVector")
+
+  code = rep("", length(inputId))
+
+  choices.lab = names(choices)
+  if (is.null(choices.lab)) choices.lab = choices
+
+
+  if (is.null(width)) {
+    chars = max(nchar(choices.lab))
+    chars = min(20, chars)
+    chars = max(4, round(0.8)*chars)
+    width=paste0(chars,"em")
+  }
+
+  style = paste0("width: ", width,";")
+
+
+  if (length(value)<=1 & !is.list(selected)) {
+    if (!is.null(value)) {
+      selected = match(value[[1]], choices)
+    }
+    selected.str = rep("", length(choices))
+    selected.str[selected] = "selected"
+
+    options.str = paste0(collapse="\n",
+      '<option value="',choices,'" ',  selected.str,'>',
+      choices.lab,'</option>'
+    )
+  } else if (!is.null(value)) {
+    options.str = unlist(lapply(value, function(val) {
+      selected.str = rep("", length(choices))
+      selected = match(val, choices)
+      selected.str[selected] = "selected"
+
+      paste0(collapse="\n",
+        '<option value="',choices,'" ',  selected.str,'>',
+        choices.lab,'</option>'
+      )
+    }))
+
+  } else {
+    stop("selected as list not yet implemented")
+  }
+
+  code = paste0('
+    <select id="',inputId,'" class="', extra.class,'">
+    ',options.str,'
+  </div>
+  ')
+  code
 }

@@ -17,6 +17,8 @@ tat:
     def_slots: INTEGER
     status: CHARACTER(2)
     create_time: DATETIME
+    random_seed: INTEGER
+
 
 topic:
   table:
@@ -34,3 +36,6 @@ student:
     first_ranking: DATETIME
     last_ranking: DATETIME
     num_ranking: INTEGER
+    priority: DOUBLE
+    active: BOOLEAN
+    fixed_pos: INTEGER

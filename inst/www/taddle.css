@@ -54,11 +54,11 @@ tr.create-options .checkbox {
   border-bottom: solid 1px black;
 }
 
-.rank-table tr:nth-child(odd), .simple-table tr:nth-child(odd) {
-  background: #DDD
+.striped-table tr:nth-child(odd) {
+  background: #EDD
 }
 
-.rank-table th, .simple-table th {
+.striped-table th {
   background: #FFF
 }
 
@@ -126,3 +126,17 @@ tr.create-options .checkbox {
   font-weight: bold;
   //font-size: 100%;
 }
+
+
+.slots-table .slots-input {
+  width: 4em;
+}
+
+.stud-table .inactive, .simple-table .inactive {
+  background: #CCC;
+}
+
+.simple-table .fixed-topic {
+  background: #DDF;
+}
+

@@ -205,7 +205,7 @@ topic.rank.table = function(tat, app=getApp()) {
 
   df = data_frame(rank = ra$rank,upBtn, downBtn, htmlEscape(ra$topic))
 
-  HTML(simpleTable(id="rank-table", df, class="rank-table", col.names = c("Rank","","", "Topic"), row.data=list(rowid = 1:n, pos=ra$pos)))
+  HTML(simpleTable(id="rank-table", df, class="rank-table striped-table", col.names = c("Rank","","", "Topic"), row.data=list(rowid = 1:n, pos=ra$pos)))
 
 }
 
