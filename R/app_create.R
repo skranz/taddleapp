@@ -87,19 +87,20 @@ new.step2.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
   names(methods) = sapply(glob$methods, function(m) m$title)
   #methods = c(list("Choose matching method later"="no"), methods)
 
-  ui = tagList(
+  ui = tagList(div(id="app_create_2_div",
     h3("Step 2: Customize"),
     p("You can enter a deadline until students should enter their preferences:"),
     tags$table(
       tags$td(shiny::dateInput("deadline_date","Deadline Date", value=tat$deadline_date)),
       tags$td(style="padding-left: 2em;", simpleTimeInput("deadline_time", "Deadline Time", width="12em", value=tat$deadline_time))
     ),
-    selectInput("method","Allocation Method", methods),
-    uiOutput("methodDescr"),
-    selectInput("random_order", "How are topics shown?",list("Show topics in random order to students. (May yield more diversified rankings.)"=TRUE, "Show topics in the original order to students."=FALSE)),
+    #selectInput("method","Allocation Method", methods),
+    selectInput("method","Allocation mechanism?", list("- Choose the allocation mechanism after all students have submitted their rankings (for an overview of mechanisms click the help tab). Students always rank all topics. Pro: You can ex-post choose the allocation that you like most. Contra: You cannot give students a guarantee that it is optimal to rank the topics according to their true preferences."="no", "- Commit to a truthful revelation mechanism (random serial dictatorship). Pro: Students will get the information that it is optimal for them to rank the topics according to their true preferences. Contra: After students have submitted their ranking, you may prefer an allocation from a different mechanism."="r")),
+    #uiOutput("methodDescr"),
+    selectInput("order_choice", "Shall topics be shown in the original order or in a shuffled order to students who rank them?",list("- Both is fine. To further scientific progress, Taddle can decide via a randomized experiment."="e", "- Show the topics in a randomly shuffled order to each student."="r", "- Show topics in the original order."="o")),
     simpleButton("back2Btn","Back", form.ids = c("deadline_date","deadline_time","method","email", "agree")),
     simpleButton("cont2Btn","Continue", form.ids = c("titleInput","topicsInput"))
-  )
+  ))
 
   buttonHandler("back2Btn", function(formValues, ...,tat=app$tat, app=getApp()) {
     restore.point("back2Btn")
@@ -110,15 +111,15 @@ new.step2.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
     show.step.ui(3)
   })
 
-  selectChangeHandler("method", function(value,...){
-    restore.point("allocMethodChange")
-    tat$method = value
-    m = glob$methods[[tat$method]]
-    setUI("methodDescr",withMathJaxNoHeader(HTML(m$descr)))
-  })
-
-  m = glob$methods[[tat$method]]
-  setUI("methodDescr",withMathJaxNoHeader(HTML(m$descr)))
+  # selectChangeHandler("method", function(value,...){
+  #   restore.point("allocMethodChange")
+  #   tat$method = value
+  #   m = glob$methods[[tat$method]]
+  #   setUI("methodDescr",withMathJaxNoHeader(HTML(m$descr)))
+  # })
+  #
+  # m = glob$methods[[tat$method]]
+  # setUI("methodDescr",withMathJaxNoHeader(HTML(m$descr)))
   ui
 }
 
