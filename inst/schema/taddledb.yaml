@@ -9,10 +9,10 @@ tat:
     agree: BOOLEAN
     org_method: CHARACTER(10)
     method: CHARACTER(10)
-    topictext: TEXT
     deadline: DATETIME
     deadline_type: CHARACTER(2)
-    random_order: BOOLEAN
+    order_choice: CHARACTER(1)
+    random_order: INTEGER
     descr: TEXT
     def_slots: INTEGER
     status: CHARACTER(2)

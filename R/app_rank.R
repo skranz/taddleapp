@@ -2,7 +2,7 @@ examples.taddleApp = function() {
   restore.point.options(display.restore.point=TRUE)
   setwd("D:/libraries/taddle/")
   app = taddleApp("D:/libraries/taddle/shared")
-  viewApp(app, url.args = list(rank="xxbssp"))
+  viewApp(app, url.args = list(rank="fgfsmq"))
   viewApp(app, url.args = list(crank="BFfOtPbWhBvUtuqYZLGw"))
 
 
@@ -13,8 +13,6 @@ examples.taddleApp = function() {
 create.random.ranks = function(rankkey, n=NULL, common.weight=0.5, db=getApp()$glob$db) {
   restore.point("create.random.ranks")
   tat = get.rank.tat(rankkey)
-
-
 
   T = NROW(tat$tops)
   if (is.null(n)) n = T
@@ -86,7 +84,9 @@ empty.stu = function(tat) {
   restore.point("empty.stu")
   ra = tat$tops
 
-  if (isTRUE(tat$random_order)) {
+  ro = runif(1,0,100) < tat$random_order
+  cat("\nro = ", ro)
+  if (ro) {
     ra$shownpos = sample(ra$pos, replace = FALSE)
   } else {
     ra$shownpos = ra$pos
@@ -122,7 +122,8 @@ show.rank.ui = function(tat = app$tat, app=getApp()) {
 
 
   if (is.empty.val(tat$descr)) {
-    tat$descr = paste0("Please rank the topics for ", tat$title, if(!is.empty.val(tat$deadline)) paste0(" until <b>", format(tat$deadline,"%A, %B %d at %H:%M"),"</b>"),". Put your most preferred topic on top and your worst preferred topic on the bottom.")
+    tat$descr = paste0("Please rank the topics for ", tat$title, if(!is.empty.val(tat$deadline)) paste0(" until <b>", format(tat$deadline,"%A, %B %d at %H:%M"),"</b>"),". Put your most preferred topic on top and your worst preferred topic on the bottom."
+    )
   }
 
   ui = tagList(
@@ -187,6 +188,9 @@ show.rank.ui = function(tat = app$tat, app=getApp()) {
     submit.ranking(tat)
 
   })
+
+  log.action("start_rank",email=stu$studemail, shownpos=stu$ra$shownpos, pos=stu$ra$pos)
+
   setUI("rankAlert","")
   setUI("mainUI", ui)
 }
@@ -245,7 +249,7 @@ submit.ranking = function(tat=app$tat, app=getApp(), glob=app$glob,...) {
     dbInsert(glob$db, "ranking", ras)
   })
 
-  log.action("rank",email=stu$studemail, studname=stu$studname)
+  log.action("sub_rank",email=stu$studemail, studname=stu$studname, pos=stu$ra$pos, rank=stu$ra$rank, shownpos=stu$ra$shownpos)
 
   timedMessage("rankAlert", html=paste0("Thanks a lot, your ranking has been submitted. You also will receive an email from ", glob$email.sender, " with a link that allows you to modify your ranking until the deadline."), millis = 60000)
 

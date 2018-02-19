@@ -19,7 +19,7 @@ taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), email.sen
   glob$taddle.dir = taddle.dir
   glob$db.dir = db.dir
 
-  glob$log.file = file.path(taddle.dir,"logs/taddle.log")
+  glob$log.file = file.path(taddle.dir,"logs", paste0("taddle-",format(Sys.Date(),"%y-%m"),".log"))
 
   glob$db = dbConnect(RSQLite::SQLite(), file.path(glob$db.dir, "taddledb.sqlite"))
   glob$db = set.db.schemas(glob$db, schema.file = system.file("schema/taddledb.yaml", package="taddleapp"))

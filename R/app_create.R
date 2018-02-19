@@ -95,7 +95,7 @@ new.step2.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
       tags$td(style="padding-left: 2em;", simpleTimeInput("deadline_time", "Deadline Time", width="12em", value=tat$deadline_time))
     ),
     #selectInput("method","Allocation Method", methods),
-    selectInput("method","Allocation mechanism?", list("- Choose the allocation mechanism after all students have submitted their rankings (for an overview of mechanisms click the help tab). Students always rank all topics. Pro: You can ex-post choose the allocation that you like most. Contra: You cannot give students a guarantee that it is optimal to rank the topics according to their true preferences."="no", "- Commit to a truthful revelation mechanism (random serial dictatorship). Pro: Students will get the information that it is optimal for them to rank the topics according to their true preferences. Contra: After students have submitted their ranking, you may prefer an allocation from a different mechanism."="r")),
+    selectInput("method","Allocation mechanism?", list("- Choose the allocation mechanism after all students have submitted their rankings (for an overview of mechanisms click the help tab). Students always rank all topics. Pro: You can ex-post choose the allocation that you like most. Contra: You cannot give students a guarantee that it is optimal to rank the topics according to their true preferences."="no", "- Commit to a truthful revelation mechanism (random serial dictatorship). Pro: Students will get the information that it is optimal for them to rank the topics according to their true preferences. Contra: After students have submitted their ranking, you may prefer an allocation from a different mechanism."="serialdict")),
     #uiOutput("methodDescr"),
     selectInput("order_choice", "Shall topics be shown in the original order or in a shuffled order to students who rank them?",list("- Both is fine. To further scientific progress, Taddle can decide via a randomized experiment."="e", "- Show the topics in a randomly shuffled order to each student."="r", "- Show topics in the original order."="o")),
     simpleButton("back2Btn","Back", form.ids = c("deadline_date","deadline_time","method","email", "agree")),
@@ -136,7 +136,7 @@ new.step3.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
     uiOutput("newSubmitAlert"),
 
     simpleButton("back3Btn","Back", form.ids = c("deadline_date","deadline_time","method","email", "agree")),
-    simpleButton("createTatBtn","Create the Allocation Task", form.ids = c("deadline_date","deadline_time","method","email","agree", "random_order", "topicsInput", "titleInput","multilineTopics","def_slots"))
+    simpleButton("createTatBtn","Create the Allocation Task", form.ids = c("deadline_date","deadline_time","method","email","agree", "order_choice", "topicsInput", "titleInput","multilineTopics","def_slots"))
   )
 
   buttonHandler("back3Btn", function(formValues, ...,tat=app$tat, app=getApp()) {
@@ -155,7 +155,7 @@ new.step3.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
     tat$deadline_time = formValues$deadline_time
     tat$method = formValues$method
     tat$agree = formValues$agree
-    tat$random_order = formValues$random_order
+    tat$order_choice = formValues$order_choice
 
     tat$title = formValues$titleInput
     tat$topic.text = formValues$topicsInput
@@ -193,6 +193,16 @@ submit.new.tat = function(..., tat=app$tat, app=getApp(), glob=app$glob) {
   tat$tatid = random.string(1,20)
   tat$rankkey = paste0(sample(letters,6, replace=TRUE), collapse="")
   tat$org_method = tat$method
+
+  if (tat$order_choice == "o") {
+    tat$random_order = 0 # never shuffle topics
+  } else if (tat$order_choice == "s") {
+    tat$random_order = 100 # always shuffle topics
+  } else if (tat$order_choice=="e") {
+    # randomized experiment
+    tat$random_order = sample(c(0, 50, 100),1)
+  }
+
   tat$random_seed = sample.int(1e10,1)
   if (is.empty.val(tat$deadline_date)) {
     tat$deadline = NA

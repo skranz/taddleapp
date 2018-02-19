@@ -1,0 +1,6 @@
+Topics in this seminar are allocated by the following algorithm:
+
+1. Every student ranks all topics
+2. The algorithm then moves through all students in a purley random order: Each student gets her most preferred topic from the set of all topics that have not yet been given to a student earlier.
+
+With this algorithm it is always optimal for you to rank the topics according to your true preferences.
