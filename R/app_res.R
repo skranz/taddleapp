@@ -4,7 +4,7 @@ examples.taddleApp = function() {
   setwd("D:/libraries/taddle/")
 
   app = taddleApp("D:/libraries/taddle/shared")
-  viewApp(app, url.args = list(key="BCjCKvxfxEAkRJnaFvvs"))
+  viewApp(app, url.args = list(key="dWVuKsXPSDidkJADCaKz"))
 
   viewApp(app)
 
@@ -74,7 +74,7 @@ res.home.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
     p(HTML(paste0("So far ", tat$num.sub-num.inactive, " ",     if(num.inactive>0) paste0(" active and ", num.inactive, " deactivated") ," submissions for ", tat$num.topics, " topics", if(tat$num.slots != tat$num.topics) paste0(" with a total of ", tat$num.slots, " slots.") ))),
     h4("Overview of allocation mechanisms: Number of students who got their n'th ranked topic"),
     HTML(ct.ui),
-    helpText("Click on a row in the table above, to see the details of the allocation."),
+    p(paste0("Click on a row in the table above, to see the details of the allocation.", if (tat$org_method=="serialdict") " Recall that students got the information that topics are assigned with a truthful revelation mechanism (random serial dictatorship). But you can also see the details for different mechanisms.")),
     uiOutput("resUI")
     #uiOutput("optUI")
   )
@@ -112,6 +112,10 @@ get.res.tat = function(tatid, db=getApp()$glob$db) {
   if (is.null(tat)) return(NULL)
 
   tat = as.list(tat[1,])
+
+
+  if (is.na(tat$random_seed))
+    tat$random_seed = sample.int(1e9,1)
 
   tat$deadline_date = as.Date(tat$deadline)
   tat$deadline_time = format(tat$deadline, "%H:%M")
@@ -239,7 +243,8 @@ compute.tat.allocation = function(method = "costmin_lin", tat) {
   prefs = matrix(ras$rank, nrow=n, ncol=T, byrow = TRUE)
 
   if (method == "serialdict") {
-    alloc = serial.dictator.alloc(prefs, slots = slots)
+    prios = with.random.seed(runif(NROW(prefs)),seed = tat$random_seed)
+    alloc = serial.dictator.alloc(prefs, prios=prios, slots = slots)
     restore.point("serialdict.alloc")
   } else if (method == "costmin_lin") {
     alloc = assignment.problem.alloc(prefs,rank.costs = (1:T)^(1.01), slots=slots)
@@ -328,7 +333,7 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
   todf$studname[na.rows] = ""
   todf$studemail[na.rows] = ""
   todf$rank[na.rows] = ""
-  todf$slots[na.rows] = ""
+  #todf$slots[na.rows] = ""
 
   todf$topic[is.false(todf$active)] = "-Student Deactivated-"
   row.class = ifelse(is.false(todf$active),"inactive",ifelse(todf$fixed,"fixed-topic", ""))
@@ -345,7 +350,7 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
 
   mlab = to.label(method, app$glob$sets$method)
   ui = tagList(
-    h4(paste0("Topic allocation via ", mlab)),
+    h4(paste0("Topic Allocation via ", mlab)),
     downloadButton("excelDownloadBtn","Download as Excel file"),
     #simpleButton("sendAllocEmailBtn", icon = icon("envelope"), "Results email for students..."),
     HTML(tohtml)
@@ -427,6 +432,7 @@ res.modify.ui = function(tat = app$tat, app=getApp()) {
       tags$td(shiny::dateInput("deadline_date","Deadline Date", value=tat$deadline_date)),
       tags$td(style="padding-left: 2em;", simpleTimeInput("deadline_time", "Deadline Time", width="12em", value=tat$deadline_time))
     ),
+    #simpleButton("redrawSeedBtn","Redraw priorities to change allocation under random serial dictatorship"), br(),
     tags$b("Modify a topic's number of slots:"),
     HTML(slots.tab),
     br(),
@@ -434,6 +440,12 @@ res.modify.ui = function(tat = app$tat, app=getApp()) {
     HTML(studs.tab),
     p("Notes: If you fix a topic for a student, the student will still take up a slot.")
   )
+
+#  buttonHandler("redrawSeedBtn", function(...) {
+#    restore.point("redrawSeedBtn")
+#    # TO DO Change Priorities
+#    app$updated.options = TRUE
+#  })
 
   changeHandler("deadline_date",fun=function(value,...) {
     args = list(...)

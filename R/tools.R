@@ -41,3 +41,14 @@ to.label = function(val, keys, labels = names(keys)) {
   labels[ind]
 }
 
+with.random.seed = function (expr, seed = 1234567890)
+{
+    #restore.point("with.random.seed")
+    old.seed = get(".Random.seed", .GlobalEnv)
+    set.seed(as.integer(seed))
+    ret = eval(expr)
+    assign(".Random.seed", old.seed, .GlobalEnv)
+    runif(1)
+    return(ret)
+}
+

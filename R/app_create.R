@@ -203,7 +203,7 @@ submit.new.tat = function(..., tat=app$tat, app=getApp(), glob=app$glob) {
     tat$random_order = sample(c(0, 50, 100),1)
   }
 
-  tat$random_seed = sample.int(1e10,1)
+  tat$random_seed = sample.int(1e9,1)
   if (is.empty.val(tat$deadline_date)) {
     tat$deadline = NA
   } else {

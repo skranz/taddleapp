@@ -103,6 +103,18 @@ empty.stu = function(tat) {
 show.rank.ui = function(tat = app$tat, app=getApp()) {
   restore.point("show.rank.ui")
   stu = tat$stu
+  glob = app$glob
+
+  if (is.null(glob$rank_info)) {
+    dir = system.file("methods", package="taddleapp")
+    glob$rank_info =list(
+      serialdict=read.as.utf8(sep.lines=FALSE,file.path(dir,"methods_rank_serialdict.html")),
+      no=read.as.utf8(sep.lines=FALSE, file.path(dir,"methods_rank_no.html"))
+    )
+  }
+
+
+
   if (is.null(tat)) {
     ui = h4("Sorry, but the specified allocation task is not available.")
     setUI("mainUI",ui)
@@ -131,6 +143,9 @@ show.rank.ui = function(tat = app$tat, app=getApp()) {
     HTML(tat$descr),
     HTML(topic.rank.table(tat)),
     br(),
+    div(id="rankInfoDiv",
+      slimCollapsePanel("Info: How are the topics allocated?", value="alloc_info",HTML(glob$rank_info[[tat$org_method]]))
+    ),
     textInput("studname", "Your name:",value=stu$studname),
     textInput("studemail", "Email:",value=stu$studemail),
     helpText("To submit your ranking, press the button below. You will still be able to change it afterwards."),
@@ -138,6 +153,11 @@ show.rank.ui = function(tat = app$tat, app=getApp()) {
     simpleButton("submitRankingBtn","Submit Ranking", form.ids = c("studname","studemail")),
     simpleButton("delRankingBtn","Delete your Ranking")
   )
+
+  customEventHandler(eventId="infoPanelClick",id=NULL, css.locator = "#rankInfoDiv a", event="click", fun= function(...) {
+    restore.point("infoPanelClick")
+    log.action("rank_info_click", email="")
+  })
 
   buttonHandler("delRankingBtn",function(...) {
     restore.point("delRankingBtn")
@@ -189,7 +209,7 @@ show.rank.ui = function(tat = app$tat, app=getApp()) {
 
   })
 
-  log.action("start_rank",email=stu$studemail, shownpos=stu$ra$shownpos, pos=stu$ra$pos)
+  log.action("rank_session",email=stu$studemail, shownpos=stu$ra$shownpos, pos=stu$ra$pos)
 
   setUI("rankAlert","")
   setUI("mainUI", ui)

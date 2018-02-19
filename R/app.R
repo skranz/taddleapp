@@ -19,7 +19,7 @@ taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), email.sen
   glob$taddle.dir = taddle.dir
   glob$db.dir = db.dir
 
-  glob$log.file = file.path(taddle.dir,"logs", paste0("taddle-",format(Sys.Date(),"%y-%m"),".log"))
+  glob$log.dir = file.path(taddle.dir,"logs")
 
   glob$db = dbConnect(RSQLite::SQLite(), file.path(glob$db.dir, "taddledb.sqlite"))
   glob$db = set.db.schemas(glob$db, schema.file = system.file("schema/taddledb.yaml", package="taddleapp"))
@@ -52,6 +52,7 @@ taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), email.sen
   )
 
   appInitHandler(function(...,session=app$session,app=getApp()) {
+    app$session_code = random.string(1)
     observe(priority = -100,x = {
       query <- parseQueryString(session$clientData$url_search)
       if (!is.null(query$rank)) {
@@ -62,9 +63,11 @@ taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), email.sen
         show.rank.ui()
       } else if (!is.null(query$key)) {
         app$tat = get.res.tat(tatid=query$key)
+        log.action("res_session")
         show.res.ui()
       } else {
         app$tat = empty.tat()
+        log.action("create_session")
         show.new.ui()
       }
     })
