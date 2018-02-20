@@ -255,7 +255,7 @@ compute.tat.allocation = function(method = "costmin_lin", tat) {
   } else if (method == "costmin_3_5") {
     costs = (1:T)^1.01
     if (T>3) costs[4] = 1000
-    if (T>4) costs[5] = 1050
+    if (T>4) costs[5] = 1500
     if (T>5) costs[6:T] = costs[6:T]*10000
 
     alloc = assignment.problem.alloc(prefs,rank.costs = costs, slots)
