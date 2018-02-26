@@ -1,5 +1,7 @@
 # dbmisc::dbCreateSQLiteFromSchema(system.file("schema/taddledb.yaml", package="taddleapp"),db.name = "taddledb.sqlite",db.dir = "D:/libraries/taddle/shared/db")
 
+# dbmisc::dbCreateSQLiteFromSchema(system.file("schema/taddledb.yaml", package="taddleapp"),db.name = "taddledb.sqlite",db.dir = "D:/libraries/taddle/taddle-test/shared/db")
+
 tat:
   table:
     tatid: CHARACTER(20)
@@ -57,10 +59,10 @@ ranking:
   index:
     - tatid, studemail
 
-questions:
-  table:
-    tatid: CHARACTER(20)
-    tattype: CHARACTER(2)
-    subject: CHARACTER(6)
-  index:
-    - tatid
+#questions:
+#  table:
+#    tatid: CHARACTER(20)
+#    tattype: CHARACTER(2)
+#    subject: CHARACTER(6)
+#  index:
+#    - tatid
