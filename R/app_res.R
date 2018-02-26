@@ -4,7 +4,7 @@ examples.taddleApp = function() {
   setwd("D:/libraries/taddle/")
 
   app = taddleApp("D:/libraries/taddle/shared")
-  viewApp(app, url.args = list(key="dWVuKsXPSDidkJADCaKz"))
+  viewApp(app, url.args = list(key="QWtVdLPGsmskvwdijnmM"))
 
   viewApp(app)
 
@@ -445,7 +445,11 @@ res.modify.ui = function(tat = app$tat, app=getApp()) {
 
   fixed.col = paste0("<div id='fixed-topic-div-",seq_len(NROW(tat$stu)),"'>", ifelse(is.na(tat$stu$fixed_pos), fix.topic.btn, paste0(remove.fix.topic.btn,tat$tops$topic[tat$stu$fixed_pos])), "</div>")
 
-  studs.tab = simpleTable(id="stud-opt-table", df=data_frame(Active=studs.active, Student=htmlEscape(tat$stu$studname), Email=(tat$stu$studemail), "Fixed Topic"= fixed.col), class="simple-table stud-table", , row.class=ifelse(tat$stu$active,"","inactive"))
+  if (NROW(tat$stu)>0) {
+    studs.tab = simpleTable(id="stud-opt-table", df=data_frame(Active=studs.active, Student=htmlEscape(tat$stu$studname), Email=(tat$stu$studemail), "Fixed Topic"= fixed.col), class="simple-table stud-table", , row.class=ifelse(tat$stu$active,"","inactive"))
+  } else {
+    studs.tab = "<p>--- No student registered yet ---</p>"
+  }
 
   ui = tagList(
     h4(paste0("Customize ",tat$title)),
