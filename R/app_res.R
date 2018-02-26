@@ -31,8 +31,7 @@ show.res.ui = function(tat = app$tat, app=getApp(),...) {
     navlistPanel(id="resMainPanel",
       tabPanel("Results",value="home",uiOutput("resHomeUI")),
       tabPanel("Options", value="modify", res.modify.ui()),
-      tabPanel("Questionaire", value="quest", res.questions.ui()),
-
+      tabPanel("Help", create.help.ui()),
       tabPanel("About", about.ui()),
       widths = c(2,10)
     ),
@@ -353,7 +352,8 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
   mlab = to.label(method, app$glob$sets$method)
   ui = tagList(
     h4(paste0("Topic Allocation via ", mlab)),
-    downloadButton("excelDownloadBtn","Download as Excel file"),
+    downloadButton("excelDownloadBtn","Download (Excel)"),
+    downloadButton("wordDownloadBtn","Download (Word)"),
     #simpleButton("sendAllocEmailBtn", icon = icon("envelope"), "Results email for students..."),
     HTML(tohtml)
   )
@@ -376,6 +376,25 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
       log.action("res_excel",method=tat$method)
     }
   )
+
+  setDownloadHandler("wordDownloadBtn",
+    filename=function(app = getApp())
+      paste0("topic_allocation.docx"),
+    content = function(file, ...) {
+      restore.point("downloadWordTopics")
+      app=getApp()
+      withProgress(message="Word file is generated, please wait a moment...", {
+        if (any(is.true(alloc$slots>1))) {
+          alloc.df = select(todf, Pos=pos, Topic=topic, Student=studname, Email=studemail, Rank=rank, Topic_Filled_Slots=slots)
+        } else {
+          alloc.df = select(todf, Pos=pos, Topic=topic, Student=studname, Email=studemail, Rank=rank)
+        }
+        alloc.word.report(file, alloc.df, tat)
+      })
+      log.action("res_word",method=tat$method)
+    }
+  )
+
 
   ui
 }
@@ -600,4 +619,57 @@ res.tab.change = function(value,...,tat=app$tat,app=getApp()) {
     ui = res.home.ui(tat=tat)
     setUI("resHomeUI",ui)
   }
+}
+
+
+alloc.word.report = function(out.file, alloc.df, tat = app$tat, app=getApp()) {
+  restore.point("alloc.word.report")
+
+  tpl.file = system.file("tpl/alloc_tpl.docx", package="taddleapp")
+  tab_style = "Plain Table 2"
+  doc = read_docx(tpl.file)
+  doc = doc %>%
+    body_add_par(paste0("Allocation for ", tat$title), style = "heading 1") %>%
+    body_add_par(paste0("Allocation Method: ", to.label(tat$method, app$glob$sets$method)), style = "heading 2") %>%
+    body_add_par("You can copy and paste the appropriate table from this report. Each table starts on a new page.")
+
+  df = select(alloc.df, Pos, Topic, Student, Email)
+  df = clear.same.prev.line(df, c("Pos","Topic"))
+  doc = doc %>%
+    body_add_par("Sorted by Topics", style = "heading 1") %>%
+    body_add_par("") %>%
+    body_add_table(df, style=tab_style)
+  doc = doc %>%
+    body_add_break() %>%
+    body_add_par("Sorted by Topics (No Email)", style = "heading 1") %>%
+    body_add_par("") %>%
+    body_add_table(select(df,-Email), style=tab_style)
+
+  df = select(alloc.df, Student, Email, Topic) %>% arrange(Student)
+  df = filter(df, nchar(Student)>0 | nchar(Email)>0)
+
+  doc = doc %>%
+    body_add_break() %>%
+    body_add_par("Sorted by Student", style = "heading 1") %>%
+    body_add_par("") %>%
+    body_add_table(df, style=tab_style)
+
+  doc = doc %>%
+    body_add_break() %>%
+    body_add_par("Sorted by Student (No Email)", style = "heading 1") %>%
+    body_add_par("") %>%
+    body_add_table(select(df,-Email) , style=tab_style)
+
+  print(doc, target = out.file)
+  invisible(doc)
+}
+
+clear.same.prev.line = function(df, cols) {
+  for (col in cols) {
+    val = as.character(df[[col]])
+    same = val == lag(val)
+    val[same] = ""
+    df[[col]] = val
+  }
+  df
 }
