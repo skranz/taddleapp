@@ -12,6 +12,7 @@ show.new.ui = function(start.pane = "home",...) {
     tabPanel("Step 1 (Topics)",value="step1", new.step1.ui()),
     tabPanel("Step 2 (Customize)",value="step2", new.step2.ui()),
     tabPanel("Step 3 (Submit)",value="step3", new.step3.ui()),
+    tabPanel("Help", create.help.ui()),
     tabPanel("About", about.ui()),
     widths = c(2,10)
   )
@@ -301,6 +302,17 @@ verify.tat = function(tat) {
 
   return(list(ok=TRUE))
 
+}
+
+create.help.ui = function(app=getApp(), glob=app$glob) {
+  restore.point("create.help.ui")
+
+  if (is.null(glob$create.help.ui)) {
+    file = system.file("doc/create_help.html", package="taddleapp")
+    html = read.as.utf8(file)
+    glob$create.help.ui = HTML(html)
+  }
+  glob$create.help.ui
 }
 
 

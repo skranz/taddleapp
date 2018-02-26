@@ -5,6 +5,7 @@ output:
     toc: yes
 ---
 
+
 # 1. Truthful Revelation: Random Serial Dictatorship
 
 Random serial dictatorship is a simple mechanism that probably comes first to mind to most microeconomists:
@@ -50,13 +51,20 @@ To see why cost-minimization mechanism may be preferable to random serial dictat
 
 Anna and Bob share the preference ordering `A, B, C` over the three topics. Carla's preferences `A, C, B` just differ by prefering C over B. The table shows the cost for each student-topic match. Here, the decision maker specified that the cost of a match is equal to the position of the topic in the student's ranking.
 
-If we want to minimize the total cost, it is optimal to always give topic C to Carla and give topics A and B to Anna and Bob. Total cost would then be $$1.5+1.5+2=5$$
+If we want to minimize the total cost, it is optimal to always give topic C to Carla and give topics A and B to Anna and Bob. Total cost would then be 
+
+1.5+1.5+2=5
 
 In contrast, with the random serial dictatorship Carla also gets topic A with probability 1/3, in which case Anna or Bob get their least desired topic C.  Expected total cost would then be higher:
-$$\frac{1}{3}((1+2+2.5)+(1+2+2.5)+(1+2+2)) \approx 5,33$$
+
+1/3 ((1+2+2.5)+(1+2+2.5)+(1+2+2)) = 5,33
 
 Does this mean that is always optimal to use the cost minimization mechanism if want to minimize a specific cost function? Not neccessarily.
 
-Assume that Carla actually prefers a lottery in which she gets A, C and B each with probability 1/3 than getting her second choice C for sure. Then in the cost-minimization mechanism Carla would benefit from misrepresenting her preferences in our example and state the preference order 'A,B,C'. Since then all students stated the same preferences, the cost minimization mechanism cannot do better than to assign each topic to each student with probability 1/3. Expected cost under the misrepresented preferences would then be $$2+2+2=6.$$ We would then have a worse outcome than under random serial dictatorship where it is optimal to state preferences truthfully.
+Assume that Carla actually prefers a lottery in which she gets A, C and B each with probability 1/3 than getting her second choice C for sure. Then in the cost-minimization mechanism Carla would benefit from misrepresenting her preferences in our example and state the preference order 'A,B,C'. Since then all students stated the same preferences, the cost minimization mechanism cannot do better than to assign each topic to each student with probability 1/3. Expected cost under the misrepresented preferences would then be 
+
+2+2+2=6.
+
+We would then have a worse outcome than under random serial dictatorship where it is optimal to state preferences truthfully.
 
 So which mechanism is better? There is no clear answer. It depends.

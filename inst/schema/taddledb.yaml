@@ -18,6 +18,9 @@ tat:
     status: CHARACTER(2)
     create_time: DATETIME
     random_seed: INTEGER
+  index:
+    - tatid
+    - rankkey
 
 
 topic:
@@ -26,6 +29,8 @@ topic:
     pos: INTEGER
     topic: TEXT
     slots: INTEGER
+  index:
+    - tatid
 
 student:
   table:
@@ -38,6 +43,9 @@ student:
     num_ranking: INTEGER
     active: BOOLEAN
     fixed_pos: INTEGER
+  index:
+    - tatid, studemail
+    - studkey
 
 ranking:
   table:
@@ -46,3 +54,13 @@ ranking:
     pos: INTEGER
     shownpos: INTEGER
     rank: INTEGER
+  index:
+    - tatid, studemail
+
+questions:
+  table:
+    tatid: CHARACTER(20)
+    tattype: CHARACTER(2)
+    subject: CHARACTER(6)
+  index:
+    - tatid

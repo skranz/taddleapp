@@ -13,21 +13,17 @@ options:
   'Adapt Slots': slots
 
 tattype:
-  'Seminar Topic Allocation': sta
-  'Different Allocation Problem': dap
-  'Just a test (no real allocation)': test
+  'Seminar Topic Allocation': st
+  'Different Allocation Problem': ot
+  'Just a test (no real allocation)': te
 
-tatsubjects:
-  'Economics (Micro)': micecon
-  'Economics (General)': econ
-  'Operations Research / Optimization': or
+subject:
   'Business Administration': ba
-  'Statistics': stat
   'Computer Sciences': cs
-  'Mathematics': math
+  'Economics': econ
   'Engineering': eng
-  'Natural Sciences & Medicine': natmed
-  'Social Sciences': so
   'Humanities': hum
-  'Law': law
+  'Mathematics / Statistics / Operations Research': math
+  'Natural Sciences & Medicine': natmed
+  'Social Sciences and Law': so
   'Other': other

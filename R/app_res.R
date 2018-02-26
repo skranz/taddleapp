@@ -31,6 +31,8 @@ show.res.ui = function(tat = app$tat, app=getApp(),...) {
     navlistPanel(id="resMainPanel",
       tabPanel("Results",value="home",uiOutput("resHomeUI")),
       tabPanel("Options", value="modify", res.modify.ui()),
+      tabPanel("Questionaire", value="quest", res.questions.ui()),
+
       tabPanel("About", about.ui()),
       widths = c(2,10)
     ),
@@ -400,6 +402,12 @@ refresh.alloc.and.ui = function(tat=app$tat, app=getApp()) {
   show.res.ui()
 }
 
+res.questions.ui = function() {
+  ui = tagList(
+    p("For our research project, we would love to know, how Taddle is used. ")
+
+  )
+}
 
 res.modify.ui = function(tat = app$tat, app=getApp()) {
   restore.point("res.modify.ui")

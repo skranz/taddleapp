@@ -134,7 +134,7 @@ show.rank.ui = function(tat = app$tat, app=getApp()) {
 
 
   if (is.empty.val(tat$descr)) {
-    tat$descr = paste0("Please rank the topics for ", tat$title, if(!is.empty.val(tat$deadline)) paste0(" until <b>", format(tat$deadline,"%A, %B %d at %H:%M"),"</b>"),". Put your most preferred topic on top and your worst preferred topic on the bottom."
+    tat$descr = paste0("Please rank the topics for ", tat$title, if(!is.empty.val(tat$deadline)) paste0(" until <b>", format(tat$deadline,"%A, %B %d at %H:%M"),"</b>"),". Put your more liked topics first.<br>(Hint: You can click on a topic name and then quickly move it with the up and down keys of your keyboard.)"
     )
   }
 
