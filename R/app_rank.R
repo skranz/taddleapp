@@ -2,8 +2,8 @@ examples.taddleApp = function() {
   restore.point.options(display.restore.point=TRUE)
   setwd("D:/libraries/taddle/")
   app = taddleApp("D:/libraries/taddle/shared")
-  viewApp(app, url.args = list(rank="fgfsmq"))
-  viewApp(app, url.args = list(crank="BFfOtPbWhBvUtuqYZLGw"))
+  viewApp(app, url.args = list(rank="ezdubd"))
+  viewApp(app, url.args = list(crank="CdchTzMRHZSaDaWGDvXZ"))
 
 
   create.random.ranks("pdsywc")
@@ -61,6 +61,7 @@ get.rank.tat = function(rankkey, db=getApp()$glob$db) {
 get.stud.tat = function(studkey, db=getApp()$glob$db) {
   restore.point("get.stud.tat")
   stu = dbGet(db,"student", list(studkey=studkey))
+  if (NROW(stu)==0) return(NULL)
   stu = as.list(stu)
   tatid = stu$tatid
   ta = dbGet(db,"tat", list(tatid = tatid))
@@ -271,7 +272,7 @@ submit.ranking = function(tat=app$tat, app=getApp(), glob=app$glob,...) {
 
   log.action("sub_rank",email=stu$studemail, studname=stu$studname, pos=stu$ra$pos, rank=stu$ra$rank, shownpos=stu$ra$shownpos)
 
-  timedMessage("rankAlert", html=paste0("Thanks a lot, your ranking has been submitted. You also will receive an email from ", glob$email.sender, " with a link that allows you to modify your ranking until the deadline."), millis = 60000)
+  timedMessage("rankAlert", html=paste0("Thanks a lot, your ranking has been successfully submitted. You also will receive an email from ", glob$email.sender, " with a link that allows you to modify your ranking until the deadline."), millis = 60000)
 
   rato = left_join(ras, select(tat$tops,pos,topic), by="pos") %>%
     arrange(rank) %>%
@@ -288,7 +289,10 @@ submit.ranking = function(tat=app$tat, app=getApp(), glob=app$glob,...) {
 
 ranking.submit.event = function(fun) {
   restore.point("ranking.submit.event")
-  customEventHandler(fun=fun,eventId = "submitRankingClick",id=NULL, event="click", css.locator = "#submitRankingBtn",extra.shiny.value.code = "formValues: shinyEventsExtractFormValues(e.target.id), ranks: get_rank_table_ranks()")
+
+  inner.js.code = '$("#rankAlert").html("<p>Try to connect to server to submit your ranking...</p>")'
+
+  customEventHandler(fun=fun,eventId = "submitRankingClick",id=NULL, event="click", css.locator = "#submitRankingBtn",inner.js.code=inner.js.code, stop.propagation = TRUE, extra.shiny.value.code = "formValues: shinyEventsExtractFormValues(e.target.id), ranks: get_rank_table_ranks()")
 }
 
 
