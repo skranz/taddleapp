@@ -4,7 +4,7 @@ examples.taddleApp = function() {
   setwd("D:/libraries/taddle/")
 
   app = taddleApp("D:/libraries/taddle/shared")
-  viewApp(app, url.args = list(key="QWtVdLPGsmskvwdijnmM"))
+  viewApp(app, url.args = list(key="ZEHqzmcOrinHXlbnebSN"))
 
   viewApp(app)
 
@@ -56,7 +56,7 @@ res.home.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
 
 
   num.inactive = sum(!tat$stu$active)
-  if (is.null(tat$allocs)) {
+  if (is.null(tat$allocs) | sum(tat$stu$active)==0) {
     ui = tagList(
       h4(paste0(tat$title)),
       uiOutput("deadlineUI"),
@@ -155,6 +155,8 @@ get.res.tat = function(tatid, db=getApp()$glob$db) {
 
 allocs.count.table.ui = function(tat=app$tat, app=getApp()) {
   restore.point("allocs.count.table.ui")
+
+
   df = allocs.count.table(tat)
 
   sel.row = if (tat$method %in% df$method) match(tat$method, df$method)
@@ -189,7 +191,11 @@ allocs.count.table = function(tat=app$tat, app=getApp()) {
   allocs = tat$allocs
   tat$methods = methods = intersect(app$glob$sets$method, unique(allocs$method))
 
-  all = expand.grid(method=methods, rank=1:max(allocs$rank, na.rm=TRUE))
+  max.rank = max(allocs$rank, na.rm=TRUE)
+  if (!is.finite(max.rank))
+    return(NULL)
+
+  all = expand.grid(method=methods, rank=1:max.rank)
 
   sum = allocs %>% group_by(method, rank) %>%
     summarize(count = n()) %>%
@@ -223,13 +229,8 @@ compute.tat.allocation = function(method = "costmin_lin", tat) {
   fixed_stud = setdiff(fixed_stud, inactive)
 
 
-
+  topics = tat$tops$topic
   studs = setdiff(studs, c(inactive,fixed_stud))
-
-  ras = filter(ras, studemail %in% studs)
-
-  n = length(studs)
-  T = max(ras$pos)
 
 
   # Substract slots from topics that have been
@@ -241,30 +242,45 @@ compute.tat.allocation = function(method = "costmin_lin", tat) {
   slots = pmax(0,tat$tops$slots - minus.fixed.slots)
 
 
-  prefs = matrix(ras$rank, nrow=n, ncol=T, byrow = TRUE)
+  ras = filter(ras, studemail %in% studs)
 
-  if (method == "serialdict") {
-    prios = with.random.seed(runif(NROW(prefs)),seed = tat$random_seed)
-    alloc = serial.dictator.alloc(prefs, prios=prios, slots = slots)
-    restore.point("serialdict.alloc")
-  } else if (method == "costmin_lin") {
-    alloc = assignment.problem.alloc(prefs,rank.costs = (1:T)^(1.01), slots=slots)
-  } else if (method == "costmin_quad") {
-    alloc = assignment.problem.alloc(prefs,rank.costs = (1:T)^2, slots=slots)
-  } else if (method == "costmin_cubic") {
-    alloc = assignment.problem.alloc(prefs,rank.costs = (1:T)^3, slots=slots)
-  } else if (method == "costmin_3_5") {
-    costs = (1:T)^1.01
-    if (T>3) costs[4] = 1000
-    if (T>4) costs[5] = 1500
-    if (T>5) costs[6:T] = costs[6:T]*10000
 
-    alloc = assignment.problem.alloc(prefs,rank.costs = costs, slots)
+  # Have some active , non-fixed students
+  if (NROW(ras)>0) {
+    n = length(studs)
+    T = max(ras$pos)
+
+
+
+    prefs = matrix(ras$rank, nrow=n, ncol=T, byrow = TRUE)
+
+    if (method == "serialdict") {
+      prios = with.random.seed(runif(NROW(prefs)),seed = tat$random_seed)
+      alloc = serial.dictator.alloc(prefs, prios=prios, slots = slots)
+      restore.point("serialdict.alloc")
+    } else if (method == "costmin_lin") {
+      alloc = assignment.problem.alloc(prefs,rank.costs = (1:T)^(1.01), slots=slots)
+    } else if (method == "costmin_quad") {
+      alloc = assignment.problem.alloc(prefs,rank.costs = (1:T)^2, slots=slots)
+    } else if (method == "costmin_cubic") {
+      alloc = assignment.problem.alloc(prefs,rank.costs = (1:T)^3, slots=slots)
+    } else if (method == "costmin_3_5") {
+      costs = (1:T)^1.01
+      if (T>3) costs[4] = 1000
+      if (T>4) costs[5] = 1500
+      if (T>5) costs[6:T] = costs[6:T]*10000
+
+      alloc = assignment.problem.alloc(prefs,rank.costs = costs, slots)
+    }
+    rank = prefs[cbind(1:n,alloc)]
+
+    res = data_frame(method = method, studemail=studs,rank=rank, pos=alloc, topic=topics[alloc], slots=org.slots[alloc], fixed=FALSE)
+
+  } else {
+    # no active, non-fixed students
+    res = NULL
   }
-  rank = prefs[cbind(1:n,alloc)]
-  topics = tat$tops$topic
 
-  res = data_frame(method = method, studemail=studs,rank=rank, pos=alloc, topic=topics[alloc], slots=org.slots[alloc], fixed=FALSE)
 
   # Add fixed students
   if (length(fixed)>0) {
@@ -339,7 +355,9 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
   todf$topic[is.false(todf$active)] = "-Student Deactivated-"
   row.class = ifelse(is.false(todf$active),"inactive",ifelse(todf$fixed,"fixed-topic", ""))
 
-  if (any(is.true(alloc$slots>1))) {
+  show.slots = any(is.true(alloc$slots>1)) | any(is.true(tat$tops$slots>1))
+
+  if (show.slots) {
     todf = select(todf, pos, topic, studname, rank, sl, studemail, slots)
     col.names = c("","Topic","Student","Ranked as","Topic Ranks","Email", "Filled Slots")
   } else {
@@ -365,7 +383,7 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
       restore.point("downloadTopics")
       app=getApp()
       withProgress(message="Excel file is generated, please wait a moment...", {
-        if (any(is.true(alloc$slots>1))) {
+        if (show.slots) {
           alloc.df = select(todf, Pos=pos, Topic=topic, Student=studname, Email=studemail, Rank=rank, Topic_Filled_Slots=slots)
         } else {
           alloc.df = select(todf, Pos=pos, Topic=topic, Student=studname, Email=studemail, Rank=rank)
@@ -384,7 +402,7 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
       restore.point("downloadWordTopics")
       app=getApp()
       withProgress(message="Word file is generated, please wait a moment...", {
-        if (any(is.true(alloc$slots>1))) {
+        if (show.slots) {
           alloc.df = select(todf, Pos=pos, Topic=topic, Student=studname, Email=studemail, Rank=rank, Topic_Filled_Slots=slots)
         } else {
           alloc.df = select(todf, Pos=pos, Topic=topic, Student=studname, Email=studemail, Rank=rank)
