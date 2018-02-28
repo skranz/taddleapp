@@ -4,7 +4,7 @@ examples.taddleApp = function() {
   setwd("D:/libraries/taddle/")
 
   app = taddleApp("D:/libraries/taddle/shared")
-  viewApp(app, url.args = list(key="ZEHqzmcOrinHXlbnebSN"))
+  viewApp(app, url.args = list(key="XjNsmVyhOEfPdJzbpoDm"))
 
   viewApp(app)
 
@@ -41,6 +41,8 @@ show.res.ui = function(tat = app$tat, app=getApp(),...) {
   eventHandler(eventId="resMainPanelClick", id=NULL, fun=res.tab.change)
   setUI("mainUI", ui)
   setUI("resHomeUI",   res.home.ui())
+  log.action("res_session", method=tat$method, counts=tat$counts.table)
+
 }
 
 res.show.deadline = function(tat=app$tat, app=getApp()) {
@@ -159,6 +161,7 @@ allocs.count.table.ui = function(tat=app$tat, app=getApp()) {
 
   df = allocs.count.table(tat)
 
+  tat$counts.table = df
   sel.row = if (tat$method %in% df$method) match(tat$method, df$method)
 
   count.mat = as.matrix(df[,-1,drop=FALSE])
@@ -639,6 +642,7 @@ res.tab.change = function(value,...,tat=app$tat,app=getApp()) {
     app$updated.options = FALSE
     tat$allocs =compute.tat.allocations(tat)
     ui = res.home.ui(tat=tat)
+    log.action("res_update",method=tat$method, counts=tat$counts.table)
     setUI("resHomeUI",ui)
   }
 }
