@@ -151,7 +151,7 @@ new.step3.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
     multi.line = formValues$multilineTopics
     def_slots = as.integer(formValues$def_slots)
 
-    tat$email = formValues$email
+    tat$email = tolower(formValues$email)
     tat$deadline_date = formValues$deadline_date
     tat$deadline_time = formValues$deadline_time
     tat$method = formValues$method

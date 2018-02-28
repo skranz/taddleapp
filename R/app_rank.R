@@ -3,7 +3,6 @@ examples.taddleApp = function() {
   setwd("D:/libraries/taddle/")
   app = taddleApp("D:/libraries/taddle/shared")
   viewApp(app, url.args = list(rank="ezdubd"))
-  viewApp(app, url.args = list(crank="CdchTzMRHZSaDaWGDvXZ"))
 
 
   create.random.ranks("pdsywc")
@@ -191,8 +190,8 @@ show.rank.ui = function(tat = app$tat, app=getApp()) {
     restore.point("ranking.submit.handler")
 
     if (is.empty.val(tat$stu$studemail)) {
-      tat$stu$studemail = formValues$studemail
-    } else if (formValues$studemail != tat$stu$studemail) {
+      tat$stu$studemail = tolower(formValues$studemail)
+    } else if (tolower(formValues$studemail) != tolower(tat$stu$studemail)) {
       msg=paste0("Sorry, but you already specified the email address ", tat$stu$studemail,". To change your email address, you first must delete your ranking by pressing the button below.")
       timedMessage("rankAlert", html=colored.html(msg), millis=60000)
       return()
