@@ -4,7 +4,7 @@ examples.taddleApp = function() {
   setwd("D:/libraries/taddle/")
 
   app = taddleApp("D:/libraries/taddle/shared")
-  viewApp(app, url.args = list(key="XjNsmVyhOEfPdJzbpoDm"))
+  viewApp(app, url.args = list(key="YLLUkzRUVSJJtHBGtciJ"))
 
   viewApp(app)
 
@@ -13,7 +13,6 @@ examples.taddleApp = function() {
 
   app = taddleApp("D:/libraries/taddle/shared")
   create.random.ranks("zigzzd", common.weight = 0.30,n = 10)
-  viewApp(app, url.args = list(key="yNDwvLZEJgpMvEbnXavy"))
 
 
 }
