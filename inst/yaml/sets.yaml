@@ -1,3 +1,5 @@
+# dir = system.file("yaml", package="taddleapp"); sets = lapply(rmdtools::read.yaml(file.path(dir, "sets.yaml")),unlist); saveRDS(sets, file.path(dir,"sets.Rds"))
+
 method:
   'Truthful Revelation: Random Serial Dictatorship': serialdict
   'Cost Minimization (linear)': costmin_lin

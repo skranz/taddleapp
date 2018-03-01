@@ -24,28 +24,19 @@ taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), email.sen
   glob$db = dbConnect(RSQLite::SQLite(), file.path(glob$db.dir, "taddledb.sqlite"))
   glob$db = set.db.schemas(glob$db, schema.file = system.file("schema/taddledb.yaml", package="taddleapp"))
 
-  methods.file = system.file("methods/methods.rmd", package="taddleapp")
-  methods = rmdtools::read.yaml(methods.file)
-  glob$methods = lapply(methods[setdiff(names(methods),ignore.methods)], function(m) {
-    m$descr = md2html(m$descr)
-    m
-  })
-
-  sets = read.yaml(system.file("yaml/sets.yaml", package="taddleapp"))
-  glob$sets = lapply(sets,unlist)
+  #sets = read.yaml(system.file("yaml/sets.yaml", package="taddleapp"))
+  #glob$sets = lapply(sets,unlist)
+  glob$sets = readRDS(system.file("yaml/sets.Rds", package="taddleapp"))
   glob$sets$method = glob$sets$method[!glob$sets$method %in% ignore.methods]
 
   shiny::addResourcePath("taddle",system.file("www", package="taddleapp"))
-
-  txt = read.as.utf8(methods.file)
-  yaml  =  parse.hashdot.yaml(txt)
 
   css.file = system.file("www/taddle.css", package="taddleapp")
   app$ui = fluidPage(theme=shinytheme("cerulean"),
     tags$head(tags$title(app.title)),
     sparkline:::spk_dependencies(),
     fontAwesomeHeader(),
-    mathjaxHeader(),
+    #mathjaxHeader(),
     includeCSS(css.file),
     uiOutput("mainUI"),
     tagList(tags$script(src="taddle/taddle.js"))
@@ -54,6 +45,7 @@ taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), email.sen
   appInitHandler(function(...,session=app$session,app=getApp()) {
     app$session_code = random.string(1)
     observe(priority = -100,x = {
+      cat("Parse query string...")
       query <- parseQueryString(session$clientData$url_search)
       if (!is.null(query$rank)) {
         app$tat = get.rank.tat(rankkey=query$rank)

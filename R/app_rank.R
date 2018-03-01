@@ -108,8 +108,8 @@ show.rank.ui = function(tat = app$tat, app=getApp()) {
   if (is.null(glob$rank_info)) {
     dir = system.file("methods", package="taddleapp")
     glob$rank_info =list(
-      serialdict=read.as.utf8(sep.lines=FALSE,file.path(dir,"methods_rank_serialdict.html")),
-      no=read.as.utf8(sep.lines=FALSE, file.path(dir,"methods_rank_no.html"))
+      serialdict=paste0(readLines(file.path(dir,"methods_rank_serialdict.html"),warn = FALSE), collapse="\n"),
+      no= paste0(readLines(file.path(dir,"methods_rank_no.html"),warn = FALSE), collapse="\n")
     )
   }
 

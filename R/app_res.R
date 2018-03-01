@@ -391,6 +391,7 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
           alloc.df = select(todf, Pos=pos, Topic=topic, Student=studname, Email=studemail, Rank=rank)
         }
         tabs = c(list(allocation=alloc.df), compute.ranking.df())
+        library(writexl)
         write_xlsx(tabs, file)
       })
       log.action("res_excel",method=tat$method)
@@ -459,9 +460,9 @@ res.modify.ui = function(tat = app$tat, app=getApp()) {
 
   studs.active = checkBoxInputVector(paste0("active-", seq_len(NROW(tat$stu))),label = NULL,value = tat$stu$active, extra.class="stud-active")
 
-  fix.topic.btn = webforms::simpleButtonVector(paste0("fix-topic-",seq_len(NROW(tat$stu))),label="", extra.class="fix-topic-btn", size="xs",icon = icon("pencil"))
+  fix.topic.btn = simpleButtonVector(paste0("fix-topic-",seq_len(NROW(tat$stu))),label="", extra.class="fix-topic-btn", size="xs",icon = icon("pencil"))
 
-  remove.fix.topic.btn = webforms::simpleButtonVector(paste0("remove-fix-topic-",seq_len(NROW(tat$stu))),label="", extra.class="remove-fix-topic-btn", size="xs",icon = icon("remove"))
+  remove.fix.topic.btn = simpleButtonVector(paste0("remove-fix-topic-",seq_len(NROW(tat$stu))),label="", extra.class="remove-fix-topic-btn", size="xs",icon = icon("remove"))
 
   fixed.col = paste0("<div id='fixed-topic-div-",seq_len(NROW(tat$stu)),"'>", ifelse(is.na(tat$stu$fixed_pos), fix.topic.btn, paste0(remove.fix.topic.btn,tat$tops$topic[tat$stu$fixed_pos])), "</div>")
 
@@ -650,6 +651,7 @@ res.tab.change = function(value,...,tat=app$tat,app=getApp()) {
 alloc.word.report = function(out.file, alloc.df, tat = app$tat, app=getApp()) {
   restore.point("alloc.word.report")
 
+  library(officer)
   tpl.file = system.file("tpl/alloc_tpl.docx", package="taddleapp")
   tab_style = "Plain Table 2"
   doc = read_docx(tpl.file)

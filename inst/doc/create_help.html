@@ -54,7 +54,7 @@
 <th>6</th>
 <th>7</th>
 <th>8</th>
-<th>…</th>
+<th>...</th>
 </tr>
 </thead>
 <tbody>
@@ -68,7 +68,7 @@
 <td>6</td>
 <td>7</td>
 <td>8</td>
-<td>…</td>
+<td>...</td>
 </tr>
 <tr class="even">
 <td>Quadratic Cost:</td>
@@ -80,7 +80,7 @@
 <td>36</td>
 <td>49</td>
 <td>64</td>
-<td>…</td>
+<td>...</td>
 </tr>
 <tr class="odd">
 <td>3-5 Cost:</td>
@@ -92,7 +92,7 @@
 <td>60000</td>
 <td>70000</td>
 <td>80000</td>
-<td>…</td>
+<td>...</td>
 </tr>
 </tbody>
 </table>
@@ -132,13 +132,13 @@
 </tr>
 </tbody>
 </table>
-<p>Anna and Bob share the preference ordering <code>A, B, C</code> over the three topics. Carla’s preferences <code>A, C, B</code> just differ by prefering C over B. The table shows the cost for each student-topic match. Here, the decision maker specified that the cost of a match is equal to the position of the topic in the student’s ranking.</p>
+<p>Anna and Bob share the preference ordering <code>A, B, C</code> over the three topics. Carla's preferences <code>A, C, B</code> just differ by prefering C over B. The table shows the cost for each student-topic match. Here, the decision maker specified that the cost of a match is equal to the position of the topic in the student’s ranking.</p>
 <p>If we want to minimize the total cost, it is optimal to always give topic C to Carla and give topics A and B to Anna and Bob. Total cost would then be</p>
 <p>1.5+1.5+2=5</p>
 <p>In contrast, with the random serial dictatorship Carla also gets topic A with probability 1/3, in which case Anna or Bob get their least desired topic C. Expected total cost would then be higher:</p>
 <p>1/3 ((1+2+2.5)+(1+2+2.5)+(1+2+2)) = 5,33</p>
 <p>Does this mean that is always optimal to use the cost minimization mechanism if want to minimize a specific cost function? Not neccessarily.</p>
-<p>Assume that Carla actually prefers a lottery in which she gets A, C and B each with probability 1/3 than getting her second choice C for sure. Then in the cost-minimization mechanism Carla would benefit from misrepresenting her preferences in our example and state the preference order ‘A,B,C’. Since then all students stated the same preferences, the cost minimization mechanism cannot do better than to assign each topic to each student with probability 1/3. Expected cost under the misrepresented preferences would then be</p>
+<p>Assume that Carla actually prefers a lottery in which she gets A, C and B each with probability 1/3 than getting her second choice C for sure. Then in the cost-minimization mechanism Carla would benefit from misrepresenting her preferences in our example and state the preference order <code>A,B,C</code>. Since then all students stated the same preferences, the cost minimization mechanism cannot do better than to assign each topic to each student with probability 1/3. Expected cost under the misrepresented preferences would then be</p>
 <p>2+2+2=6.</p>
 <p>We would then have a worse outcome than under random serial dictatorship where it is optimal to state preferences truthfully.</p>
 <p>So which mechanism is better? There is no clear answer. It depends.</p>

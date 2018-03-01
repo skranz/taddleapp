@@ -1,4 +1,5 @@
 examples.taddleApp = function() {
+  library(taddleapp)
   restore.point.options(display.restore.point=TRUE)
   setwd("D:/libraries/taddle/")
   app = taddleApp("D:/libraries/taddle/shared")
@@ -84,9 +85,6 @@ new.step1.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
 
 new.step2.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
   restore.point("new.step2.ui")
-  methods = names(glob$methods)
-  names(methods) = sapply(glob$methods, function(m) m$title)
-  #methods = c(list("Choose matching method later"="no"), methods)
 
   ui = tagList(div(id="app_create_2_div",
     h3("Step 2: Customize"),
@@ -95,7 +93,6 @@ new.step2.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
       tags$td(shiny::dateInput("deadline_date","Deadline Date", value=tat$deadline_date)),
       tags$td(style="padding-left: 2em;", simpleTimeInput("deadline_time", "Deadline Time", width="12em", value=tat$deadline_time))
     ),
-    #selectInput("method","Allocation Method", methods),
     selectInput("method","Allocation mechanism?", list("- Choose the allocation mechanism after all students have submitted their rankings (for an overview of mechanisms click the help tab). Students always rank all topics. Pro: You can ex-post choose the allocation that you like most. Contra: You cannot give students a guarantee that it is optimal to rank the topics according to their true preferences."="no", "- Commit to a truthful revelation mechanism (random serial dictatorship). Pro: Students will get the information that it is optimal for them to rank the topics according to their true preferences. Contra: After students have submitted their ranking, you may prefer an allocation from a different mechanism."="serialdict")),
     #uiOutput("methodDescr"),
     selectInput("order_choice", "Shall topics be shown in the original order or in a shuffled order to students who rank them?",list("- Both is fine. To further scientific progress, Taddle can decide via a randomized experiment."="e", "- Show the topics in a randomly shuffled order to each student."="r", "- Show topics in the original order."="o")),
@@ -112,24 +109,11 @@ new.step2.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
     show.step.ui(3)
   })
 
-  # selectChangeHandler("method", function(value,...){
-  #   restore.point("allocMethodChange")
-  #   tat$method = value
-  #   m = glob$methods[[tat$method]]
-  #   setUI("methodDescr",withMathJaxNoHeader(HTML(m$descr)))
-  # })
-  #
-  # m = glob$methods[[tat$method]]
-  # setUI("methodDescr",withMathJaxNoHeader(HTML(m$descr)))
   ui
 }
 
 new.step3.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
   restore.point("new.step3.ui")
-  methods = names(glob$methods)
-  names(methods) = sapply(glob$methods, function(m) m$title)
-  #methods = c(list("Choose matching method later"="no"), methods)
-
   ui = tagList(
     h3("Step 3: Submit"),
     textInput("email","Your Email"),
@@ -309,7 +293,7 @@ create.help.ui = function(app=getApp(), glob=app$glob) {
 
   if (is.null(glob$create.help.ui)) {
     file = system.file("doc/create_help.html", package="taddleapp")
-    html = read.as.utf8(file)
+    html = paste0(readLines(file,warn = FALSE), collapse="\n")
     glob$create.help.ui = HTML(html)
   }
   glob$create.help.ui

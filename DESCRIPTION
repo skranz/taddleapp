@@ -1,14 +1,14 @@
 Package: taddleapp
 Type: Package
 Title: Taddle Shiny App 
-Version: 0.1
-Date: 2018-02-05
+Version: 0.2
+Date: 2018-03-01
 Author: Sebastian Kranz
 Maintainer: Sebastian Kranz <sebastian.kranz@uni-ulm.de>
 Description: Taddle Shiny App
 License: GPL >= 2.0
 LazyData: TRUE
 Depends: stringtools, restorepoint, dplyr, tidyr, clue,
-         shiny, shinyEvents, shinyEventsUI, rmdtools,
-         shinyEventsLogin, shinythemes, webforms, lubridate,
-         sparkline, sendmailR, writexl, officer
+         shiny, shinyEvents, shinythemes, lubridate,
+         sparkline, sendmailR, dbmisc, htmltools, jsonlite
+Suggests: writexl, officer

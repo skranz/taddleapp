@@ -1,3 +1,17 @@
+is.true = function(val) {
+  if (length(val)==0)
+    return(FALSE)
+  val[is.na(val)] = FALSE
+  return(val)
+}
+
+is.false = function(x) {
+  if (!is.logical(x)) return(!isTRUE(x))
+  if (is.null(x)) return(FALSE)
+   x[is.na(x)] = TRUE
+  !x
+}
+
 tabulate.to = function(x, to=max(x)) {
   y = 1:to
   tabulate(c(x,y))-1
@@ -52,3 +66,18 @@ with.random.seed = function (expr, seed = 1234567890)
     return(ret)
 }
 
+# from rmdtools
+format.vals = function(vals, signif.digits=NULL, round.digits=NULL) {
+  if (is.numeric(vals)) {
+    if (is.null(signif.digits) & is.null(round.digits)) {
+      return(vals)
+    } else if (!is.null(signif.digits) & is.null(round.digits)) {
+      return(signif(vals, signif.digits))
+    } else if (is.null(signif.digits) & !is.null(round.digits)) {
+      return(round(vals, signif.digits))
+    } else {
+      return(signif(round(vals, round.digits), signif.digits))
+    }
+  }
+  vals
+}

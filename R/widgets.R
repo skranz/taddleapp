@@ -127,3 +127,83 @@ tableSelectInputVector = function (inputId, choices, selected=1, width=NULL, val
   ')
   code
 }
+
+# from webforms
+simpleButtonVector = function(id, label="",icon=NULL, size=c("default","sm","xs")[1], class=paste0("btn btn-default action-button", if (size != "default") paste0(" btn-",size)), extra.class = "", extra.head="") {
+  if (is.null(icon)) {
+    icon=""
+  }
+  paste0('<button id="',id,'" type="button" class="',class, ' ',extra.class,'" ',extra.head,'>',icon,label,'</button>')
+}
+
+# from webforms
+checkBoxInputVector = function (inputId, label=NULL, value = FALSE, extra.class="",extra.head = "", wrap.shiny=FALSE,...)  {
+  restore.point("checkBoxInputVector")
+  code = rep("", length(inputId))
+  checked.str = ifelse(value,' checked="checked"',"")
+  value = rep(value, length.out=length(code))
+  input.code = paste0('<input id="',inputId,'" type="checkbox" ', checked.str,' class="', extra.class,'" ', extra.head,'/>')
+
+  if (!wrap.shiny) {
+    return(input.code)
+  }
+
+  code = paste0('
+<div class="form-group shiny-input-container">
+  <div class="checkbox">
+    ',
+    #if(is.null(label)) {
+    #  input.code
+    #} else {
+      paste0('<label>', input.code,'
+      <span>',label,'</span>
+      </label>')
+    #},'
+    ,'
+  </div>
+</div>
+  ')
+  code
+}
+
+# from webforms
+simpleSelect = function(inputId, label, choices, selected = NULL, multiple = FALSE, selectize = TRUE, width = NULL, size = NULL, class = if (!selectize) "form-control", extra.class="", style=if (!is.null(width)) paste0("width: ", width)) {
+  class = paste0(class, " ", extra.class)
+
+  selectTag <- tags$select(id = inputId, size = size, shiny:::selectOptions(choices, selected), class=class, style=style)
+  if (multiple)
+    selectTag$attribs$multiple <- "multiple"
+  selectTag
+}
+
+# from shinyEventsUI
+
+timedMessage = function(id,msg="",html=msg,ui=HTML(html), millis=3000, empty.msg = "", empty.ui=HTML(empty.msg), app=getApp()) {
+  restore.point("timedMessage")
+  try({
+    setUI(id, ui)
+    dsetUI(id, ui)
+  })
+
+  obs.id = paste0("..timedMessage..",id)
+  flag.id = paste0("flag", obs.id)
+  app[[flag.id]] = FALSE
+
+  # destroy old observer
+  if (!is.null(app[[obs.id]])) try(app[[obs.id]]$destroy())
+
+  if (!is.finite(millis)) return()
+
+  app[[obs.id]] = observe({
+    if (!isTRUE(app[[flag.id]])) {
+      app[[flag.id]] = TRUE
+      invalidateLater(millis)
+      return()
+    }
+    try(app[[obs.id]]$destroy())
+    try({
+      setUI(id, empty.ui)
+      dsetUI(id, empty.ui)
+    })
+  })
+}
