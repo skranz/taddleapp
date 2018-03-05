@@ -90,11 +90,10 @@ tr.create-options .checkbox {
   border-right: solid 1px black;
 }
 
-.rank.table {
-	border-collapse: collapse;
-	display: block;
-	overflow-x: auto;
+.rank-table tr.topn {
+  background: #DDF;
 }
+
 
 .simple-table td{
   border-left: solid 1px black;
@@ -145,3 +144,6 @@ tr.create-options .checkbox {
   background: #DDF;
 }
 
+tr.top-empty, tr.ranked {
+  display:none;
+}

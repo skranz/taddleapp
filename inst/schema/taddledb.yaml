@@ -13,6 +13,7 @@ tat:
     method: CHARACTER(10)
     deadline: DATETIME
     deadline_type: CHARACTER(2)
+    topn: INTEGER
     order_choice: CHARACTER(1)
     random_order: INTEGER
     descr: TEXT

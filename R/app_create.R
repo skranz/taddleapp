@@ -88,12 +88,13 @@ new.step2.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
 
   ui = tagList(div(id="app_create_2_div",
     h3("Step 2: Customize"),
-    p("You can enter a deadline until students should enter their preferences:"),
+    p("You can enter a deadline (using Central European Time) until students should enter their preferences:"),
     tags$table(
       tags$td(shiny::dateInput("deadline_date","Deadline Date", value=tat$deadline_date)),
       tags$td(style="padding-left: 2em;", simpleTimeInput("deadline_time", "Deadline Time", width="12em", value=tat$deadline_time))
     ),
-    selectInput("method","Allocation mechanism?", list("- Choose the allocation mechanism after all students have submitted their rankings (for an overview of mechanisms click the help tab). Students always rank all topics. Pro: You can ex-post choose the allocation that you like most. Contra: You cannot give students a guarantee that it is optimal to rank the topics according to their true preferences."="no", "- Commit to a truthful revelation mechanism (random serial dictatorship). Pro: Students will get the information that it is optimal for them to rank the topics according to their true preferences. Contra: After students have submitted their ranking, you may prefer an allocation from a different mechanism."="serialdict")),
+    selectInput("method","Allocation mechanism?", list("- Choose the allocation mechanism after all students have submitted their rankings (for an overview of mechanisms click the help tab). Pro: You can ex-post choose the allocation that you like most. Contra: You cannot give students a guarantee that it is optimal to rank the topics according to their true preferences."="no", "- Commit to a truthful revelation mechanism (random serial dictatorship). Pro: Students will get the information that it is optimal for them to rank the topics according to their true preferences. Contra: After students have submitted their ranking, you may prefer an allocation from a different mechanism."="serialdict")),
+    selectInput("topn","Do you want to tell students it suffices to rank a limited number of topics?", list("No"=NA_integer_,"Just rank Top-3 topics"=3,"Just rank Top-5 topics"=5,"Just rank Top-10 topics"=10)),
     #uiOutput("methodDescr"),
     selectInput("order_choice", "Shall topics be shown in the original order or in a shuffled order to students who rank them?",list("- Both is fine. To further scientific progress, Taddle can decide via a randomized experiment."="e", "- Show the topics in a randomly shuffled order to each student."="r", "- Show topics in the original order."="o")),
     simpleButton("back2Btn","Back", form.ids = c("deadline_date","deadline_time","method","email", "agree")),
@@ -121,7 +122,7 @@ new.step3.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
     uiOutput("newSubmitAlert"),
 
     simpleButton("back3Btn","Back", form.ids = c("deadline_date","deadline_time","method","email", "agree")),
-    simpleButton("createTatBtn","Create the Allocation Task", form.ids = c("deadline_date","deadline_time","method","email","agree", "order_choice", "topicsInput", "titleInput","multilineTopics","def_slots"))
+    simpleButton("createTatBtn","Create the Allocation Task", form.ids = c("deadline_date","deadline_time","method","email","agree", "order_choice", "topicsInput", "titleInput","multilineTopics","def_slots","topn"))
   )
 
   buttonHandler("back3Btn", function(formValues, ...,tat=app$tat, app=getApp()) {
@@ -141,6 +142,8 @@ new.step3.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
     tat$method = formValues$method
     tat$agree = formValues$agree
     tat$order_choice = formValues$order_choice
+    tat$topn = as.integer(formValues$topn)
+
 
     tat$title = formValues$titleInput
     tat$topic.text = formValues$topicsInput

@@ -2,7 +2,7 @@ examples.taddleApp = function() {
   restore.point.options(display.restore.point=TRUE)
   setwd("D:/libraries/taddle/")
   app = taddleApp("D:/libraries/taddle/shared")
-  viewApp(app, url.args = list(rank="ezdubd"))
+  viewApp(app, url.args = list(rank="pqquss"))
 
 
   create.random.ranks("pdsywc")
@@ -47,13 +47,10 @@ get.rank.tat = function(rankkey, db=getApp()$glob$db) {
   ta = ta[NROW(ta),]
   ta = as.list(ta)
   tops = dbGet(db,"topic", list(tatid=ta$tatid))
-
   ta$tops = tops
-
   ta$stu = empty.stu(ta)
-
+  ta$ra = empty.ra(ta)
   as.environment(ta)
-
 }
 
 
@@ -72,18 +69,17 @@ get.stud.tat = function(studkey, db=getApp()$glob$db) {
 
   ra = dbGet(db,"ranking", list(tatid=tatid, studemail=stu$studemail))
   ra = left_join(ra, select(tops,pos,topic), by="pos") %>% arrange(rank)
-  stu$ra = ra
+  tat$ra = ra
 
   ta$tops = tops
   ta$stu = stu
   as.environment(ta)
 }
 
+empty.ra = function(tat) {
+  restore.point("empty.ra")
 
-empty.stu = function(tat) {
-  restore.point("empty.stu")
   ra = tat$tops
-
   ro = runif(1,0,100) < tat$random_order
   cat("\nro = ", ro)
   if (ro) {
@@ -91,68 +87,21 @@ empty.stu = function(tat) {
   } else {
     ra$shownpos = ra$pos
   }
-  ra$rank = ra$shownpos
-  ra = arrange(ra, rank)
-
-
-  stu = list(ra=ra,tatid=tat$tatid, studemail="", studname="", studkey="", num_ranking=0, last_ranking=NULL, first_ranking=NULL, active=TRUE)
-
-  stu
+  if (is.empty.val(tat$topn)) {
+    ra$rank = ra$shownpos
+  } else {
+    ra$rank = NA
+  }
+  ra = arrange(ra, shownpos)
+  ra
 }
 
-show.rank.ui = function(tat = app$tat, app=getApp()) {
-  restore.point("show.rank.ui")
-  stu = tat$stu
-  glob = app$glob
+empty.stu = function(tat) {
+  list(tatid=tat$tatid, studemail="", studname="", studkey="", num_ranking=0, last_ranking=NULL, first_ranking=NULL, active=TRUE)
+}
 
-  if (is.null(glob$rank_info)) {
-    dir = system.file("methods", package="taddleapp")
-    glob$rank_info =list(
-      serialdict=paste0(readLines(file.path(dir,"methods_rank_serialdict.html"),warn = FALSE), collapse="\n"),
-      no= paste0(readLines(file.path(dir,"methods_rank_no.html"),warn = FALSE), collapse="\n")
-    )
-  }
-
-
-
-  if (is.null(tat)) {
-    ui = h4("Sorry, but the specified allocation task is not available.")
-    setUI("mainUI",ui)
-    return()
-  }
-  if (!is.empty.val(tat$deadline)) {
-    if (tat$deadline < Sys.time()) {
-      ui = tagList(
-        h4(tat$title),
-        p(paste0("Sorry, but the deadline ", format(tat$deadline)," for your ranking has already passed."))
-      )
-      setUI("mainUI",ui)
-      return()
-
-    }
-  }
-
-
-  if (is.empty.val(tat$descr)) {
-    tat$descr = paste0("Please rank the topics for ", tat$title, if(!is.empty.val(tat$deadline)) paste0(" until <b>", format(tat$deadline,"%A, %B %d at %H:%M"),"</b>"),". Put your more liked topics first.<br>(Hint: You can click on a topic name and then quickly move it with the up and down keys of your keyboard.)"
-    )
-  }
-
-  ui = tagList(
-    h4(tat$title),
-    HTML(tat$descr),
-    HTML(topic.rank.table(tat)),
-    br(),
-    div(id="rankInfoDiv",
-      slimCollapsePanel("Info: How are the topics allocated?", value="alloc_info",HTML(glob$rank_info[[tat$org_method]]))
-    ),
-    textInput("studname", "Your name:",value=stu$studname),
-    textInput("studemail", "Email:",value=stu$studemail),
-    helpText("To submit your ranking, press the button below. You will still be able to change it afterwards."),
-    uiOutput("rankAlert"),
-    simpleButton("submitRankingBtn","Submit Ranking", form.ids = c("studname","studemail")),
-    simpleButton("delRankingBtn","Delete your Ranking")
-  )
+create.rank.handlers = function(tat=app$tat, app=getApp()) {
+  restore.point("create.rank.handlers")
 
   customEventHandler(eventId="infoPanelClick",id=NULL, css.locator = "#rankInfoDiv a", event="click", fun= function(...) {
     restore.point("infoPanelClick")
@@ -199,27 +148,82 @@ show.rank.ui = function(tat = app$tat, app=getApp()) {
     tat$stu$studname = formValues$studname
 
     pos = unlist(ranks)
-    ra = tat$stu$ra
+    ra = tat$ra
     rows = match(pos, ra$pos)
     ra$rank[rows] = seq_along(pos)
 
-    tat$stu$ra = ra
+    tat$ra = ra
 
     submit.ranking(tat)
 
   })
 
-  log.action("rank_session",email=stu$studemail, shownpos=stu$ra$shownpos, pos=stu$ra$pos)
+
+}
+
+show.rank.ui = function(tat = app$tat, app=getApp()) {
+  restore.point("show.rank.ui")
+  stu = tat$stu
+  glob = app$glob
+
+  if (is.null(glob$rank_info)) {
+    dir = system.file("methods", package="taddleapp")
+    glob$rank_info =list(
+      serialdict=paste0(readLines(file.path(dir,"methods_rank_serialdict.html"),warn = FALSE), collapse="\n"),
+      no= paste0(readLines(file.path(dir,"methods_rank_no.html"),warn = FALSE), collapse="\n")
+    )
+  }
+
+
+
+  if (is.null(tat)) {
+    ui = h4("Sorry, but the specified allocation task is not available.")
+    setUI("mainUI",ui)
+    return()
+  }
+  if (!is.empty.val(tat$deadline)) {
+    if (tat$deadline < Sys.time()) {
+      ui = tagList(
+        h4(tat$title),
+        p(paste0("Sorry, but the deadline ", format(tat$deadline)," for your ranking has already passed."))
+      )
+      setUI("mainUI",ui)
+      return()
+
+    }
+  }
+
+  use.topn = !is.empty.val(tat$topn)
+  ui = tagList(
+    h4(tat$title),
+    if (use.topn) {
+      rank.topn.table.ui()
+    } else {
+      rank.all.table.ui()
+    },
+    br(),
+    div(id="rankInfoDiv",
+      slimCollapsePanel("Info: How are the topics allocated?", value="alloc_info",HTML(glob$rank_info[[tat$org_method]]))
+    ),
+    textInput("studname", "Your name:",value=stu$studname),
+    textInput("studemail", "Email:",value=stu$studemail),
+    helpText("To submit your ranking, press the button below. You will still be able to change it afterwards."),
+    uiOutput("rankAlert"),
+    simpleButton("submitRankingBtn","Submit Ranking", form.ids = c("studname","studemail")),
+    simpleButton("delRankingBtn","Delete your Ranking")
+  )
+
+
+  log.action("rank_session",email=stu$studemail, shownpos=tat$shownpos, pos=tat$ra$pos, topn=tat[["topn"]])
 
   setUI("rankAlert","")
   setUI("mainUI", ui)
 }
 
-topic.rank.table = function(tat, app=getApp()) {
-  restore.point("topic.rank.table")
-  ra = tat$stu$ra
+rank.all.table.ui = function(tat = app$tat, app=getApp()) {
+  restore.point("rank.all.table.ui")
+  ra = tat$ra
   n = NROW(ra)
-
 
   upBtn = simpleButtonVector(id=paste0("upBtn-", 1:n),icon = icon("arrow-up"),extra.class = "up-btn")
   downBtn = simpleButtonVector(id=paste0("downBtn-", 1:n),icon = icon("arrow-down"),extra.class = "down-btn")
@@ -229,9 +233,105 @@ topic.rank.table = function(tat, app=getApp()) {
 
   df = data_frame(rank = ra$rank,upBtn, downBtn, htmlEscape(ra$topic))
 
-  HTML(simpleTable(id="rank-table", df, class="rank-table striped-table", col.names = c("Rank","","", "Topic"), row.data=list(rowid = 1:n, pos=ra$pos)))
+  tab = HTML(simpleTable(id="rank-table", df, class="rank-table striped-table", col.names = c("Rank","","", "Topic"), row.data=list(rowid = 1:n, pos=ra$pos)))
 
+
+  descr = paste0("Please rank the topics for ", tat$title,
+    if(!is.empty.val(tat$deadline)) paste0(" until <b>", format(tat$deadline,"%A, %B %d at %H:%M"),"</b> (Central European Time Zone)"),
+    ". Put your more liked topics first.",
+    "<br>(Hint: You can click on a topic name and then quickly move it with the up and down keys of your keyboard.)"
+  )
+  tagList(
+    HTML(descr),
+    tab
+  )
 }
+
+
+rank.topn.table.ui = function(tat = app$tat, app=getApp()) {
+  restore.point("rank.topn.table.ui")
+  ra = tat$ra
+
+  rat = filter(ra, !is.na(rank)) %>%
+    arrange(rank)
+
+  n = tat$topn
+
+  upBtn = simpleButtonVector(id=paste0("upBtn-", 1:n),icon = icon("arrow-up"),extra.class = "up-btn btn-sm")
+  downBtn = simpleButtonVector(id=paste0("downBtn-", 1:n),icon = icon("arrow-down"),extra.class = "down-btn btn-sm")
+  delBtn = simpleButtonVector(id=paste0("delBtn-", 1:n),icon = icon("remove"),extra.class = "del-btn btn-sm")
+
+  upBtn[1] = ""
+  downBtn[n] = ""
+  #btns = paste0(upBtn, downBtn)
+
+  df = data_frame(rank = 1:n, topic=htmlEscape(fill.vector(rat$topic,n,"")),delBtn, upBtn, downBtn)
+  row.class = fill.vector(rep("top-filled",NROW(rat)),n,"top-empty")
+  shownpos = fill.vector(rat$shownpos,n,0)
+
+  top.tab = HTML(simpleTable(id="top-table", df, class="ra-table top-table striped-table", col.names = c("Rank","Topic","", "",""), row.class=row.class, row.data=list(rank = 1:n, shownpos=shownpos)))
+
+
+  n = NROW(ra)
+  row.class = ifelse(is.na(ra$rank),"unranked","ranked")
+
+  addBtn = simpleButtonVector(id=paste0("addBtn-", 1:n),icon = icon("plus","fa-sm"),extra.class = "add-btn btn-sm")
+
+  all.df = data_frame(addBtn, htmlEscape(ra$topic))
+  all.tab =  HTML(simpleTable(id="all-table", all.df, class="ra-table all-table striped-table", col.names = c("Add", "Topic"), row.class=row.class, row.data=list(pos = ra$pos, shownpos=ra$shownpos)))
+
+
+  descr = paste0("Please choose your Top ",  tat$topn, " topics from the list of not chosen topics", if(!is.empty.val(tat$deadline)) paste0("  until <b>", format(tat$deadline,"%A, %B %d at %H:%M"),"</b> (Central European Time Zone)"),
+      ". Put your more liked topics first. You can remove a Top ", tat$topn," topic or change its rank with buttons on the right of the table."
+  )
+
+  ui = tagList(
+    includeCSS(system.file("www/topn.css", package="taddleapp")),
+    HTML(descr),
+    fluidRow(
+      column(width = 4,
+        h4("Not Chosen Topics:"),
+        all.tab
+      ),
+      column(width=7,
+        h4(paste0("Your Top ", tat$topn," topics:")),
+        top.tab
+      )
+    )
+    #,singleton(tags$script(src="taddle/topn.js"))
+  )
+}
+
+html.escape = function(text,attribute=FALSE) {
+  if (length(text)==0) return(text)
+  htmlEscape(text,attribute)
+}
+
+fill.vector = function(x, n, empty="") {
+  if (length(x)>n) return(x[seq_len(n)])
+  if (length(x)==n) return(x)
+  c(x, rep(empty, n-length(x)))
+}
+
+rank.topn.table.ui.old = function(tat = app$tat, app=getApp()) {
+  restore.point("rank.topn.table.ui")
+  ra = tat$ra
+  n = NROW(ra)
+
+  upBtn = simpleButtonVector(id=paste0("upBtn-", 1:n),icon = icon("arrow-up"),extra.class = "up-btn")
+  downBtn = simpleButtonVector(id=paste0("downBtn-", 1:n),icon = icon("arrow-down"),extra.class = "down-btn")
+  upBtn[1] = ""
+  downBtn[n] = ""
+  #btns = paste0(upBtn, downBtn)
+
+  df = data_frame(rank = ra$rank,upBtn, downBtn, htmlEscape(ra$topic))
+
+  ui = HTML(simpleTable(id="rank-table", df, class="rank-table striped-table", col.names = c("Rank","","", "Topic"), row.data=list(rowid = 1:n, pos=ra$pos)))
+
+  ui
+}
+
+
 
 
 submit.ranking = function(tat=app$tat, app=getApp(), glob=app$glob,...) {
@@ -255,7 +355,7 @@ submit.ranking = function(tat=app$tat, app=getApp(), glob=app$glob,...) {
     stu$studkey = random.string(1,20)
   tat$stu = stu
 
-  ras = transmute(stu$ra, tatid=tat$tatid, studemail = stu$studemail, pos=pos, shownpos=shownpos, rank=rank)
+  ras = transmute(tat$ra, tatid=tat$tatid, studemail = stu$studemail, pos=pos, shownpos=shownpos, rank=rank)
 
   #student = c(list(tat$tatid, tat$stu[c("studkey","studemail","studname","first_rank","last_rank")]
   # Insert dataset
@@ -269,7 +369,7 @@ submit.ranking = function(tat=app$tat, app=getApp(), glob=app$glob,...) {
     dbInsert(glob$db, "ranking", ras)
   })
 
-  log.action("sub_rank",email=stu$studemail, studname=stu$studname, pos=stu$ra$pos, rank=stu$ra$rank, shownpos=stu$ra$shownpos)
+  log.action("sub_rank",email=stu$studemail, studname=stu$studname, pos=tat$ra$pos, rank=tat$ra$rank, shownpos=tat$ra$shownpos)
 
   timedMessage("rankAlert", html=paste0("Thanks a lot, your ranking has been successfully submitted. You also will receive an email from ", glob$email.sender, " with a link that allows you to modify your ranking until the deadline."), millis = 60000)
 

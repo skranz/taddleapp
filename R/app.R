@@ -31,14 +31,18 @@ taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), email.sen
 
   shiny::addResourcePath("taddle",system.file("www", package="taddleapp"))
 
-  css.file = system.file("www/taddle.css", package="taddleapp")
+  #css.file = system.file("www/taddle.css", package="taddleapp")
   app$ui = fluidPage(theme=shinytheme("cerulean"),
-    tags$head(tags$title(app.title)),
+    tags$head(
+      tags$title(app.title),
+      tags$link(rel="stylesheet", type="text/css", href="taddle/taddle.css")
+    ),
     sparkline:::spk_dependencies(),
     fontAwesomeHeader(),
     #mathjaxHeader(),
-    includeCSS(css.file),
+#   includeCSS(css.file),
     uiOutput("mainUI"),
+    tagList(tags$script(src="taddle/topn.js")),
     tagList(tags$script(src="taddle/taddle.js"))
   )
 

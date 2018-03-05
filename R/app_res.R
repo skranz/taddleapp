@@ -4,7 +4,7 @@ examples.taddleApp = function() {
   setwd("D:/libraries/taddle/")
 
   app = taddleApp("D:/libraries/taddle/shared")
-  viewApp(app, url.args = list(key="YLLUkzRUVSJJtHBGtciJ"))
+  viewApp(app, url.args = list(key="xVVYccPMgKLHPdUfzLjC"))
 
   viewApp(app)
 
