@@ -6,7 +6,7 @@ examples.taddleApp = function() {
   app = taddleApp("D:/libraries/taddle/shared")
   viewApp(app, url.args = list(key="xVVYccPMgKLHPdUfzLjC"))
 
-  viewApp(app)
+  viewApp(app, url.args = list(key="WfnXKnESazRdZvoAecIw"))
 
   create.random.ranks("edtnlp", common.weight = 0.30,n = 10)
 
@@ -47,7 +47,7 @@ show.res.ui = function(tat = app$tat, app=getApp(),...) {
 res.show.deadline = function(tat=app$tat, app=getApp()) {
   has.deadline = !is.empty.val(tat$deadline)
   diff.str = if (has.deadline) duration.string(Sys.time(),tat$deadline)
-  html  = if (has.deadline) p(HTML(paste0("Deadline: ", format(tat$deadline,"%A, %B %d at %H:%M"), " (",diff.str,")")))
+  html  = if (has.deadline) p(HTML(paste0("Deadline (Central European Time Zone): ", format(tat$deadline,"%A, %B %d at %H:%M"), " (",diff.str,")")))
 
   setUI("deadlineUI", html)
 }
@@ -495,7 +495,7 @@ res.modify.ui = function(tat = app$tat, app=getApp()) {
     uiOutput("sresModifyAlert"),
     #simpleButton("saveResModBtn","Save Changes and Update Results",form.sel = ".slots-input, .active-checkbox"),
 
-    p("You can change the deadline until students should enter their preferences:"),
+    p("You can change the deadline (Central European Time Zone) until students should enter their preferences:"),
     uiOutput("deadlineModAlert"),
     tags$table(
       tags$td(shiny::dateInput("deadline_date","Deadline Date", value=tat$deadline_date)),
