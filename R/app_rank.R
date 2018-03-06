@@ -2,7 +2,7 @@ examples.taddleApp = function() {
   restore.point.options(display.restore.point=TRUE)
   setwd("D:/libraries/taddle/")
   app = taddleApp("D:/libraries/taddle/shared")
-  viewApp(app, url.args = list(rank="xacvpo"))
+  viewApp(app, url.args = list(rank="yhqbvh"))
 
 
   create.random.ranks("pdsywc")

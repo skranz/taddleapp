@@ -153,6 +153,8 @@ new.step3.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
     tat$num.slots = sum(tat$slots)
     tat$num.topics = length(tat$topics)
 
+    tat$topn = min(tat$topn, tat$num.topics)
+
     submit.new.tat(tat)
 
   })
