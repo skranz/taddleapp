@@ -174,13 +174,13 @@ ranktableMoveRow = function(tr, by) {
 
 }
 
-get_rank_table_ranks = function() {
-  var ranks = [];
+get_rank_table_pos = function() {
+  var pos = [];
   $("#rank-table tr" ).each(function( index ) {
     if (index>0)
-      ranks.push($( this ).data("pos"));
+      pos.push($( this ).data("pos"));
   });
-  return ranks;
+  return pos;
 }
 
 $('body').on('click', '#counts-table tbody tr',function(e){

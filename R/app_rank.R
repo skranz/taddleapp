@@ -135,30 +135,61 @@ create.rank.handlers = function(tat=app$tat, app=getApp()) {
 
   })
 
-  ranking.submit.event(function(ranks, formValues,tat=getApp()$tat,...) {
-    restore.point("ranking.submit.handler")
 
-    if (is.empty.val(tat$stu$studemail)) {
-      tat$stu$studemail = tolower(formValues$studemail)
-    } else if (tolower(formValues$studemail) != tolower(tat$stu$studemail)) {
-      msg=paste0("Sorry, but you already specified the email address ", tat$stu$studemail,". To change your email address, you first must delete your ranking by pressing the button below.")
+  # Submit Button Click
+  inner.js.code = '$("#rankAlert").html("<p>Try to connect to server to submit your ranking...</p>")'
+
+  if (is.empty.val(tat$topn)) {
+    customEventHandler(fun=ranking.submit.click,eventId = "submitRankingClick",id=NULL, event="click", css.locator = "#submitRankingBtn",inner.js.code=inner.js.code, stop.propagation = TRUE, extra.shiny.value.code = "formValues: shinyEventsExtractFormValues(e.target.id), pos: get_rank_table_pos()")
+  } else {
+    customEventHandler(fun=ranking.submit.click,eventId = "submitRankingClick",id=NULL, event="click", css.locator = "#submitRankingBtn",inner.js.code=inner.js.code, stop.propagation = TRUE, extra.shiny.value.code = "formValues: shinyEventsExtractFormValues(e.target.id), shownpos: get_top_table_shownpos()")
+  }
+}
+
+ranking.submit.click = function(pos=NULL, shownpos=NULL, formValues=NULL, tat=app$tat, app=getApp(),...) {
+  restore.point("ranking.submit.click")
+
+  if (is.empty.val(formValues$studname)) {
+    msg=paste0("You have not entered a name.")
+    timedMessage("rankAlert", html=colored.html(msg), millis=60000)
+    return()
+  }
+
+  if (is.empty.val(formValues$studemail)) {
+    msg=paste0("Your email adress is still empty.")
+    timedMessage("rankAlert", html=colored.html(msg), millis=60000)
+    return()
+  }
+
+  ra = tat$ra
+  if (is.empty.val(tat$topn)) {
+    pos = unlist(pos)
+    rows = match(pos, ra$pos)
+    ra$rank[rows] = seq_along(pos)
+  } else {
+    shownpos = unlist(shownpos)
+    # Check if topn topics are chosen
+    if (any(shownpos==0)) {
+      msg=paste0("You have only ranked, ", sum(shownpos>0), " topics, but you need to choose ", tat$topn, " topics.")
       timedMessage("rankAlert", html=colored.html(msg), millis=60000)
       return()
     }
-    tat$stu$studname = formValues$studname
 
-    pos = unlist(ranks)
-    ra = tat$ra
-    rows = match(pos, ra$pos)
-    ra$rank[rows] = seq_along(pos)
+    rows = match(shownpos, ra$shownpos)
+    ra$rank = NA_integer_
+    ra$rank[rows] = seq_along(shownpos)
+  }
 
-    tat$ra = ra
-
-    submit.ranking(tat)
-
-  })
-
-
+  if (is.empty.val(tat$stu$studemail)) {
+    tat$stu$studemail = tolower(formValues$studemail)
+  } else if (tolower(formValues$studemail) != tolower(tat$stu$studemail)) {
+    msg=paste0("Sorry, but you already specified the email address ", tat$stu$studemail,". To change your email address, you first must delete your ranking by pressing the button below.")
+    timedMessage("rankAlert", html=colored.html(msg), millis=60000)
+    return()
+  }
+  tat$stu$studname = formValues$studname
+  tat$ra = ra
+  submit.ranking(tat)
 }
 
 show.rank.ui = function(tat = app$tat, app=getApp()) {
@@ -214,6 +245,7 @@ show.rank.ui = function(tat = app$tat, app=getApp()) {
   )
 
 
+  create.rank.handlers()
   log.action("rank_session",email=stu$studemail, shownpos=tat$shownpos, pos=tat$ra$pos, topn=tat[["topn"]])
 
   setUI("rankAlert","")
@@ -282,7 +314,7 @@ rank.topn.table.ui = function(tat = app$tat, app=getApp()) {
 
 
   descr = paste0("Please choose your Top ",  tat$topn, " topics from the list of not chosen topics", if(!is.empty.val(tat$deadline)) paste0("  until <b>", format(tat$deadline,"%A, %B %d at %H:%M"),"</b> (Central European Time Zone)"),
-      ". Put your more liked topics first. You can remove a Top ", tat$topn," topic or change its rank with buttons on the right of the table."
+      ". Put your more liked topics first. You can remove a Top ", tat$topn," topic or change its rank with buttons on the right of the table. <b>Press the submit button at the bottom of the page to submit your ranking.</b>"
   )
 
   ui = tagList(
@@ -294,8 +326,13 @@ rank.topn.table.ui = function(tat = app$tat, app=getApp()) {
         all.tab
       ),
       column(width=7,
-        h4(paste0("Your Top ", tat$topn," topics:")),
-        top.tab
+        h4(paste0("Your Top ", tat$topn," Topics:")),
+        div(id="top-tab-div", style=if(NROW(rat)==0) "display: none;",
+          top.tab
+        ),
+        div(id="top-tab-empty-div", style=if(NROW(rat)>0) "display: none;",
+          p("--- No topics selected yet ---")
+        )
       )
     )
     #,singleton(tags$script(src="taddle/topn.js"))
@@ -373,7 +410,8 @@ submit.ranking = function(tat=app$tat, app=getApp(), glob=app$glob,...) {
 
   timedMessage("rankAlert", html=paste0("Thanks a lot, your ranking has been successfully submitted. You also will receive an email from ", glob$email.sender, " with a link that allows you to modify your ranking until the deadline."), millis = 60000)
 
-  rato = left_join(ras, select(tat$tops,pos,topic), by="pos") %>%
+  rato = filter(ras, !is.na(rank)) %>%
+    left_join(select(tat$tops,pos,topic), by="pos") %>%
     arrange(rank) %>%
     select(rank, topic)
 
@@ -383,15 +421,6 @@ submit.ranking = function(tat=app$tat, app=getApp(), glob=app$glob,...) {
 
   taddle.send.email(to=stu$studemail, subject = paste0(tat$title, ": Your Ranking of Topics"), body=body)
 
-}
-
-
-ranking.submit.event = function(fun) {
-  restore.point("ranking.submit.event")
-
-  inner.js.code = '$("#rankAlert").html("<p>Try to connect to server to submit your ranking...</p>")'
-
-  customEventHandler(fun=fun,eventId = "submitRankingClick",id=NULL, event="click", css.locator = "#submitRankingBtn",inner.js.code=inner.js.code, stop.propagation = TRUE, extra.shiny.value.code = "formValues: shinyEventsExtractFormValues(e.target.id), ranks: get_rank_table_ranks()")
 }
 
 

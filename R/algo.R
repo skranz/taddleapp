@@ -142,6 +142,7 @@ star.range.alloc = function(prefs, stars.max, stars.start=prefs[,1], prios = run
 assignment.problem.alloc = function(prefs, rank.costs=seq_len(max(prefs))^2, slots=rep(1,NCOL(prefs)), no.match.cost = max(rank.costs)*1000) {
   restore.point("assignment.problem.algo")
 
+  has.na = any(is.na(prefs))
   n = NROW(prefs)
   S = sum(slots)
   T = NCOL(prefs)
@@ -159,6 +160,11 @@ assignment.problem.alloc = function(prefs, rank.costs=seq_len(max(prefs))^2, slo
     costs = cbind(costs, matrix(no.match.cost,n,n-S))
   }
 
+  # Not all topics are neccessarily ranked
+  if (has.na) {
+    not.cost = ceiling(max(costs, na.rm=TRUE)*(n+1))
+    costs[is.na(costs)] = not.cost
+  }
 
   res = solve_LSAP(costs)
   res[res>S] = NA
@@ -168,5 +174,12 @@ assignment.problem.alloc = function(prefs, rank.costs=seq_len(max(prefs))^2, slo
   if (multi.slot) {
     res = slot.cols[res]
   }
+
+  # Set students without matched topics to NA
+  if (has.na) {
+    na.res = is.na(prefs[cbind(1:n,res)])
+    res[na.res] = NA_integer_
+  }
+
   res
 }

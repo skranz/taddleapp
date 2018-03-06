@@ -64,6 +64,9 @@ toptableAddTopic = function(str) {
 
   str.removeClass("unranked").addClass("ranked");
   dtr.removeClass("top-empty").addClass("top-filled");
+  $("#top-tab-div").css( "display", "block" );
+  $("#top-tab-empty-div").css( "display", "none");
+
 };
 
 toptableRemoveTopic = function(str) {
@@ -94,11 +97,20 @@ toptableRemoveTopic = function(str) {
     td = str.find(".col-2");
   }
 
+
+  if (last == 1) {
+    $("#top-tab-div").css( "display", "none" );
+    $("#top-tab-empty-div").css( "display", "block");
+  }
+
+
   dtr.removeClass("ranked").addClass("unranked");
   td.html("");
   tr.removeClass("top-filled").addClass("top-empty");
   tr.data("shownpos",0);
   rtr.removeClass("sel-row");
+
+
 };
 
 
@@ -141,11 +153,12 @@ toptableMoveRow = function(tr, by) {
   dtr.addClass("sel-row");
 };
 
-get_rank_table_ranks = function() {
-  var ranks = [];
+
+get_top_table_shownpos = function() {
+  var shownpos = [];
   $("#top-table tr" ).each(function( index ) {
     if (index>0)
-      ranks.push($( this ).data("pos"));
+      shownpos.push($( this ).data("shownpos"));
   });
-  return ranks;
+  return shownpos;
 };

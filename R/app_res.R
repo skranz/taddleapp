@@ -219,6 +219,10 @@ compute.tat.allocations = function(tat=app$tat, app=getApp()) {
 
 compute.tat.allocation = function(method = "costmin_lin", tat) {
   restore.point("compute.tat.allocation")
+
+
+  all.ranked = is.empty.val(tat$topn)
+
   ras = tat$ras
 
   ras = arrange(ras, studemail, pos)
@@ -251,9 +255,6 @@ compute.tat.allocation = function(method = "costmin_lin", tat) {
   if (NROW(ras)>0) {
     n = length(studs)
     T = max(ras$pos)
-
-
-
     prefs = matrix(ras$rank, nrow=n, ncol=T, byrow = TRUE)
 
     if (method == "serialdict") {
@@ -325,10 +326,12 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
   todf$studemail = htmlEscape(todf$studemail)
 
   # Create sparklines
-  ras = tat$ras
-  max.rank = max(ras$rank)
+  ras = tat$ras %>% filter(!is.na(rank))
+  max.rank = max(ras$rank, na.rm=TRUE)
   cc = rep("blue", max.rank)
   todf$sl = ""
+
+  max.bar = max(table(paste0(ras$pos,";",ras$rank)))
 
   rows = which(!is.na(todf$pos))
   .pos = 0
@@ -340,7 +343,7 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
     }
     ccn = cc
     ccn[todf$rank[row]] = "red"
-    todf$sl[row]  = spk_chr(tabs,chartRangeMin=0, type="bar", colorMap = ccn, tooltipFormat = '{{value}} ranked as 1+{{offset}}')
+    todf$sl[row]  = spk_chr(tabs,chartRangeMin=0, chartRangeMax=max.bar, type="bar", colorMap = ccn, tooltipFormat = '{{value}} ranked as 1+{{offset}}')
   }
 
   na.rows = which(is.na(todf$pos))
@@ -421,19 +424,21 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
 }
 
 compute.ranking.df = function(tat=app$tat,  app=getApp()) {
+  restore.point("compute.ranking.df")
+
   ras = tat$ras
   mat = ras %>% select(studemail, rank, pos) %>%
     arrange(studemail,pos) %>%
     spread(key = pos, value = rank)
   colnames(mat)[-1] = paste0("Topic ", colnames(mat)[-1])
 
-  mar = ras %>% select(studemail, rank, pos) %>%
+  mar = ras %>% filter(!is.na(rank)) %>%
+    select(studemail, rank, pos) %>%
     arrange(studemail,rank) %>%
     spread(key = rank, value = pos)
   colnames(mar)[-1] = paste0("Rank ", colnames(mar)[-1])
 
   list("rank_by_topic"=mat, "topic_by_rank"=mar)
-
 }
 
 refresh.alloc.and.ui = function(tat=app$tat, app=getApp()) {
