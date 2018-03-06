@@ -75,7 +75,9 @@ res.home.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
   ui = tagList(
     h4(paste0(tat$title)),
     uiOutput("deadlineUI"),
-    p(HTML(paste0("So far ", tat$num.sub-num.inactive, " ",     if(num.inactive>0) paste0(" active and ", num.inactive, " deactivated") ," submissions for ", tat$num.topics, " topics", if(tat$num.slots != tat$num.topics) paste0(" with a total of ", tat$num.slots, " slots.") ))),
+    p(HTML(paste0(
+      "So far ", tat$num.sub-num.inactive, " ", if(num.inactive>0) paste0(" active and ", num.inactive, " deactivated") ," submissions for ", tat$num.topics, " topics", if(tat$num.slots != tat$num.topics) paste0(" with a total of ", tat$num.slots, " slots."), if (!is.empty.val(tat$topn)) " Each student ranked ", tat$topn, " topics."
+    ))),
     h4("Overview of allocation mechanisms: Number of students who got their n'th ranked topic"),
     HTML(ct.ui),
     p(paste0("Click on a row in the table above, to see the details of the allocation.", if (tat$org_method=="serialdict") " Recall that students got the information that topics are assigned with a truthful revelation mechanism (random serial dictatorship). But you can also see the details for different mechanisms.")),
