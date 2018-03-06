@@ -183,7 +183,15 @@ allocs.count.table.ui = function(tat=app$tat, app=getApp()) {
   df = select(df, method, sl, everything())
 
 
-  html = simpleTable(id="counts-table",class="simple-table count-table", df=df,sel.row=sel.row, col.names = c("","", paste0("Rank ", colnames(mat[,-(1), drop=FALSE]))) )
+  has.na = colnames(df)[NCOL(df)] == "<NA>"
+  col.names = c("","", paste0("Rank ", colnames(mat[,-(1), drop=FALSE])))
+
+  if (has.na) {
+    col.names[length(col.names)] = "No Topic"
+  }
+
+
+  html = simpleTable(id="counts-table",class="simple-table count-table", df=df,sel.row=sel.row, col.names = col.names)
   HTML(html)
 
 }
@@ -193,11 +201,15 @@ allocs.count.table = function(tat=app$tat, app=getApp()) {
   allocs = tat$allocs
   tat$methods = methods = intersect(app$glob$sets$method, unique(allocs$method))
 
+
   max.rank = max(allocs$rank, na.rm=TRUE)
   if (!is.finite(max.rank))
     return(NULL)
 
-  all = expand.grid(method=methods, rank=1:max.rank)
+  all = expand.grid(
+    method=methods,
+    rank=c(1:max.rank, if(any(is.na(allocs$rank))) NA_integer_)
+  )
 
   sum = allocs %>% group_by(method, rank) %>%
     summarize(count = n()) %>%
