@@ -4,6 +4,7 @@ examples.taddleApp = function() {
   app = taddleApp("D:/libraries/taddle/shared")
   viewApp(app, url.args = list(rank="yhqbvh"))
 
+  viewApp(app, url.args = list(crank="ikdVDUuEpiIxohuqWPuT"))
 
   create.random.ranks("pdsywc")
 
@@ -69,7 +70,7 @@ get.stud.tat = function(studkey, db=getApp()$glob$db) {
 
   ra = dbGet(db,"ranking", list(tatid=tatid, studemail=stu$studemail))
   ra = left_join(ra, select(tops,pos,topic), by="pos") %>% arrange(rank)
-  tat$ra = ra
+  ta$ra = ra
 
   ta$tops = tops
   ta$stu = stu
