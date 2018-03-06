@@ -2,9 +2,10 @@ examples.taddleApp = function() {
   restore.point.options(display.restore.point=TRUE)
   setwd("D:/libraries/taddle/")
   app = taddleApp("D:/libraries/taddle/shared")
-  viewApp(app, url.args = list(rank="yhqbvh"))
 
+  viewApp(app, url.args = list(rank="sflcum"))
   viewApp(app, url.args = list(crank="ikdVDUuEpiIxohuqWPuT"))
+
 
   create.random.ranks("pdsywc")
 
@@ -283,7 +284,7 @@ rank.all.table.ui = function(tat = app$tat, app=getApp()) {
 
 rank.topn.table.ui = function(tat = app$tat, app=getApp()) {
   restore.point("rank.topn.table.ui")
-  ra = tat$ra
+  ra = tat$ra %>% arrange(shownpos)
 
   rat = filter(ra, !is.na(rank)) %>%
     arrange(rank)
