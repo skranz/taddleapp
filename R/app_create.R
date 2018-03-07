@@ -15,7 +15,8 @@ show.new.ui = function(start.pane = "home",...) {
     tabPanel("Step 3 (Submit)",value="step3", new.step3.ui()),
     tabPanel("Help", create.help.ui()),
     tabPanel("About", about.ui()),
-    widths = c(2,10)
+    widths = c(2,10),
+    tags$script(src="taddle/create.js")
   )
   setUI("mainUI", ui)
 }

@@ -277,7 +277,8 @@ rank.all.table.ui = function(tat = app$tat, app=getApp()) {
   )
   tagList(
     HTML(descr),
-    tab
+    tab,
+    tags$script(src="taddle/all_rank.js")
   )
 }
 
@@ -336,8 +337,8 @@ rank.topn.table.ui = function(tat = app$tat, app=getApp()) {
           p("--- No topics selected yet ---")
         )
       )
-    )
-    #,singleton(tags$script(src="taddle/topn.js"))
+    ),
+    tags$script(src="taddle/topn_rank.js")
   )
 }
 

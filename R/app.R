@@ -41,9 +41,9 @@ taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), email.sen
     fontAwesomeHeader(),
     #mathjaxHeader(),
 #   includeCSS(css.file),
-    uiOutput("mainUI"),
-    tagList(tags$script(src="taddle/topn.js")),
-    tagList(tags$script(src="taddle/taddle.js"))
+    uiOutput("mainUI")
+    #,tagList(tags$script(src="taddle/topn.js"))
+    #,tagList(tags$script(src="taddle/taddle.js"))
   )
 
   appInitHandler(function(...,session=app$session,app=getApp()) {
