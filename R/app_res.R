@@ -4,7 +4,7 @@ examples.taddleApp = function() {
   setwd("D:/libraries/taddle/")
 
   app = taddleApp("D:/libraries/taddle/shared")
-  viewApp(app, url.args = list(key="lARlLtPVeZUgIDVFjhav"))
+  viewApp(app, url.args = list(key="IafFfwxoZnMeIJGnPvLz"))
 
   create.random.ranks("edtnlp", common.weight = 0.30,n = 10)
 
@@ -588,7 +588,6 @@ res.modify.ui = function(tat = app$tat, app=getApp()) {
     html = paste0(fix.topic.btn[row])
     setInnerHTML(id=paste0('fixed-topic-div-',row), html)
     app$updated.options = TRUE
-
   })
 
 
@@ -596,12 +595,16 @@ res.modify.ui = function(tat = app$tat, app=getApp()) {
     #args = list(...)
     restore.point("slots-input-change")
     pos = as.integer(str.right.of(id,"slots-"))
+    old_slots = tat$tops$slots[pos]
     slots = as.integer(value)
     tat$tops$slots[pos] = slots
     tat$num.slots = sum(tat$tops$slots)
 
     dbUpdate(app$glob$db,"topic", list(slots=slots), list(tatid=tat$tatid, pos=pos))
     app$updated.options = TRUE
+
+    log.action("mod_slots", pos=pos, old_slots=old_slots, new_slots=slots)
+
   })
 
   checkboxChangeHandler(class="stud-active", fun= function(id, checked,...) {
@@ -611,6 +614,11 @@ res.modify.ui = function(tat = app$tat, app=getApp()) {
     tat$stu$active[row] = checked
     dbUpdate(app$glob$db,"student", list(active=checked), list(tatid=tat$tatid, studemail=tat$stu$studemail[row]))
 
+    if (checked) {
+      log.action("activate_stud", studemail = tat$stu$studemail[row])
+    } else {
+      log.action("deactivate_stud", studemail = tat$stu$studemail[row])
+    }
 
     app$updated.options = TRUE
   })

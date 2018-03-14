@@ -62,7 +62,7 @@ taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), email.sen
         show.res.ui()
       } else {
         app$tat = empty.tat()
-        log.action("create_session")
+        log.action("create_session", email=NULL)
         show.new.ui()
       }
     })

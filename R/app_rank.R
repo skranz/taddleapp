@@ -3,11 +3,9 @@ examples.taddleApp = function() {
   setwd("D:/libraries/taddle/")
   app = taddleApp("D:/libraries/taddle/shared")
 
-  viewApp(app, url.args = list(rank="sflcum"))
-  viewApp(app, url.args = list(crank="ikdVDUuEpiIxohuqWPuT"))
+  viewApp(app, url.args = list(rank="cwobzs"))
 
-
-  create.random.ranks("pdsywc")
+  #create.random.ranks("pdsywc")
 
 }
 
@@ -248,7 +246,7 @@ show.rank.ui = function(tat = app$tat, app=getApp()) {
 
 
   create.rank.handlers()
-  log.action("rank_session",email=stu$studemail, shownpos=tat$shownpos, pos=tat$ra$pos, topn=tat[["topn"]])
+  log.action("rank_session",email=stu$studemail, shownpos=tat$ra$shownpos, pos=tat$ra$pos, topn=tat[["topn"]])
 
   setUI("rankAlert","")
   setUI("mainUI", ui)
@@ -409,7 +407,7 @@ submit.ranking = function(tat=app$tat, app=getApp(), glob=app$glob,...) {
     dbInsert(glob$db, "ranking", ras)
   })
 
-  log.action("sub_rank",email=stu$studemail, studname=stu$studname, pos=tat$ra$pos, rank=tat$ra$rank, shownpos=tat$ra$shownpos)
+  log.action("sub_rank",email=stu$studemail, studname=stu$studname, pos=tat$ra$pos, rank=tat$ra$rank, shownpos=tat$ra$shownpos, topn=tat[["topn"]])
 
   timedMessage("rankAlert", html=paste0("Thanks a lot, your ranking has been successfully submitted. You also will receive an email from ", glob$email.sender, " with a link that allows you to modify your ranking until the deadline."), millis = 60000)
 
