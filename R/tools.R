@@ -81,3 +81,23 @@ format.vals = function(vals, signif.digits=NULL, round.digits=NULL) {
   }
   vals
 }
+
+replace.empty.elements = function(x, repl) {
+  rep.names = setdiff(names(repl),names(x))
+  x[rep.names] = repl[rep.names]
+  x
+}
+
+nlist =function (...) {
+    li = list(...)
+    li.names = names(li)
+    names = unlist(as.list(match.call())[-1])
+    if (!is.null(li.names)) {
+        no.names = li.names == ""
+        names(li)[no.names] = names[no.names]
+    }
+    else {
+        names(li) = names
+    }
+    li
+}

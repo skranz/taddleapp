@@ -10,5 +10,5 @@ License: GPL >= 2.0
 LazyData: TRUE
 Depends: stringtools, restorepoint, dplyr, tidyr, clue,
          shiny, shinyEvents, shinythemes, lubridate,
-         sparkline, sendmailR, dbmisc, htmltools, jsonlite
+         sparkline, sendmailR, dbmisc, htmltools, jsonlite,glue
 Suggests: writexl, officer

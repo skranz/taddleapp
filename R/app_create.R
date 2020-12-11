@@ -1,8 +1,9 @@
 examples.taddleApp = function() {
   library(taddleapp)
   restore.point.options(display.restore.point=TRUE)
-  setwd("D:/libraries/taddle/")
-  app = taddleApp("D:/libraries/taddle/shared")
+  setwd("C:/libraries/taddle/")
+  app = taddleApp("C:/libraries/taddle/shared")
+  app = taddleApp("C:/libraries/taddle/shared", custom.ui = custom.ui, app.title = "ESP Course Selection")
   viewApp(app)
 }
 
@@ -31,6 +32,9 @@ new.home.ui = function(..., app=getApp(), glob=app$glob) {
       )
     )
   )
+  ui.fun = glob$custom.ui$home.ui.fun
+  if (!is.null(ui.fun)) ui = ui.fun()
+
   buttonHandler("newAllocBtn", function(...) {
     tat = as.environment(as.list(app$tat))
     tat$new = TRUE
@@ -75,6 +79,9 @@ new.step1.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
     ),
     simpleButton("cont1Btn","Continue", form.ids = c("titleInput","topicsInput"))
   ))
+  ui.fun = glob$custom.ui$step1.ui.fun
+  if (!is.null(ui.fun)) ui = ui.fun(tat,topics.ui)
+
 
   buttonHandler("cont1Btn", function(formValues, ...,tat=app$tat, app=getApp()) {
     restore.point("cont1Btn")
@@ -101,6 +108,9 @@ new.step2.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
     simpleButton("back2Btn","Back", form.ids = c("deadline_date","deadline_time","method","email", "agree")),
     simpleButton("cont2Btn","Continue", form.ids = c("titleInput","topicsInput"))
   ))
+  ui.fun = glob$custom.ui$step2.ui.fun
+  if (!is.null(ui.fun)) ui = ui.fun(tat)
+
 
   buttonHandler("back2Btn", function(formValues, ...,tat=app$tat, app=getApp()) {
     restore.point("back2Btn")
@@ -231,6 +241,8 @@ submit.new.tat = function(..., tat=app$tat, app=getApp(), glob=app$glob) {
   taddle.send.email(to=tat$email, subject = paste0("New Allocation Task: ", tat$title), body=body)
 
   app$last.create.time = Sys.time()
+  if (app$glob$single.task)
+    update.task.file(tat=tat, is.running=TRUE)
 }
 
 parsed.topic.table = function(tat) {

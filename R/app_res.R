@@ -15,7 +15,7 @@ examples.taddleApp = function() {
 
 }
 
-show.res.ui = function(tat = app$tat, app=getApp(),...) {
+show.res.ui = function(tat = app$tat, app=getApp(), show.new=FALSE,...) {
 
   if (is.null(tat)) {
     ui = tagList(p("Your key does not refer to an existing allocation task."))
@@ -28,12 +28,26 @@ show.res.ui = function(tat = app$tat, app=getApp(),...) {
     navlistPanel(id="resMainPanel",
       tabPanel("Results",value="home",uiOutput("resHomeUI")),
       tabPanel("Options", value="modify", res.modify.ui()),
+      if (show.new) tabPanel("New Task", value="new", tagList(
+        tags$br(),
+        tags$b("Warning: If you create a new task, the results for the current task will not be accessible anymore."),
+        tags$br(),
+        simpleButton("resNewTaskBtn", "Create new task")
+      )),
       tabPanel("Help", create.help.ui()),
       tabPanel("About", about.ui()),
       widths = c(2,10)
     ),
     tags$script(src="taddle/res.js")
   )
+
+  if (show.new) {
+    buttonHandler("resNewTaskBtn", function(...,app=getApp()) {
+      app$tat = empty.tat()
+      log.action("create_session", email=NULL)
+      show.new.ui()
+    })
+  }
 
   eventHandler(eventId="resMainPanelClick", id=NULL, fun=res.tab.change)
   setUI("mainUI", ui)
@@ -53,14 +67,16 @@ res.show.deadline = function(tat=app$tat, app=getApp()) {
 res.home.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
   restore.point("res.home.ui")
 
+  strings = glob$strings
 
   num.inactive = sum(!tat$stu$active)
   if (is.null(tat$allocs) | sum(tat$stu$active)==0) {
     ui = tagList(
       h4(paste0(tat$title)),
       uiOutput("deadlineUI"),
+      p(paste0("The task was created on ",tat$create_time)),
       p(HTML(paste0(
-        "So far ", tat$num.sub-num.inactive, " ", if(num.inactive>0) paste0(" active and ", num.inactive, " deactivated") ," submissions for ", tat$num.topics, " topics", if(tat$num.slots != tat$num.topics) paste0(" with a total of ", tat$num.slots, " slots."), if (!is.empty.val(tat$topn)) paste0(" Each student ranked ", tat$topn, " topics.")
+        "So far ", tat$num.sub-num.inactive, " ", if(num.inactive>0) paste0(" active and ", num.inactive, " deactivated") ," submissions for ", tat$num.topics, " ", strings$topics, if(tat$num.slots != tat$num.topics) paste0(" with a total of ", tat$num.slots, " slots."), if (!is.empty.val(tat$topn)) paste0(" Each student ranked ", tat$topn, " ",strings$topics,".")
       )))
     )
     res.show.deadline()
@@ -73,10 +89,11 @@ res.home.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
   ui = tagList(
     h4(paste0(tat$title)),
     uiOutput("deadlineUI"),
+    p(paste0("The task was created on ",tat$create_time)),
     p(HTML(paste0(
-      "So far ", tat$num.sub-num.inactive, " ", if(num.inactive>0) paste0(" active and ", num.inactive, " deactivated") ," submissions for ", tat$num.topics, " topics", if(tat$num.slots != tat$num.topics) paste0(" with a total of ", tat$num.slots, " slots."), if (!is.empty.val(tat$topn)) paste0(" Each student ranked ", tat$topn, " topics.")
+      "So far ", tat$num.sub-num.inactive, " ", if(num.inactive>0) paste0(" active and ", num.inactive, " deactivated") ," submissions for ", tat$num.topics, " ",strings$topics, if(tat$num.slots != tat$num.topics) paste0(" with a total of ", tat$num.slots, " slots."), if (!is.empty.val(tat$topn)) paste0(" Each student ranked ", tat$topn, " ",strings$topics,".")
     ))),
-    h4("Overview of allocation mechanisms: Number of students who got their n'th ranked topic"),
+    h4(paste0("Overview of allocation mechanisms: Number of students who got their n'th ranked ", strings$topic)),
     HTML(ct.ui),
     p(paste0("Click on a row in the table above, to see the details of the allocation.", if (tat$org_method=="serialdict") " Recall that students got the information that topics are assigned with a truthful revelation mechanism (random serial dictatorship). But you can also see the details for different mechanisms.")),
     uiOutput("resUI")
@@ -99,10 +116,14 @@ res.home.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
 
   })
 
-  if (tat$method %in% tat$methods) {
-    res.ui = allocation.info.ui(tat$method, tat)
+  method = tat$method
+  if (!method %in% tat$methods)
+    method = first(tat$methods)
+
+  #if (tat$method %in% tat$methods) {
+    res.ui = allocation.info.ui(method, tat)
     setUI("resUI", res.ui)
-  }
+  #}
 
   #setUI("optUI", res.options.ui(tat))
 
@@ -158,7 +179,7 @@ get.res.tat = function(tatid, db=getApp()$glob$db) {
 
 allocs.count.table.ui = function(tat=app$tat, app=getApp()) {
   restore.point("allocs.count.table.ui")
-
+  strings=app$glob$strings
 
   df = allocs.count.table(tat)
 
@@ -189,7 +210,7 @@ allocs.count.table.ui = function(tat=app$tat, app=getApp()) {
   col.names = c("","", paste0("Rank ", colnames(mat[,-(1), drop=FALSE])))
 
   if (has.na) {
-    col.names[length(col.names)] = "No Topic"
+    col.names[length(col.names)] = paste0("No ", strings$Topic)
   }
 
 
@@ -231,7 +252,7 @@ compute.tat.allocations = function(tat=app$tat, app=getApp()) {
   return(allocs)
 }
 
-compute.tat.allocation = function(method = "costmin_lin", tat) {
+compute.tat.allocation = function(method = "costmin_lin", tat, no.match.pref.add=1) {
   restore.point("compute.tat.allocation")
 
 
@@ -327,6 +348,8 @@ compute.tat.allocation = function(method = "costmin_lin", tat) {
 allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), use.sparklines=TRUE) {
   restore.point("allocation.info.ui")
 
+  strings = app$glob$strings
+
   .method = method
   alloc = filter(tat$allocs, method==.method) %>%
     arrange(pos) %>% left_join(tat$stu, by="studemail")
@@ -361,7 +384,7 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
   }
 
   na.rows = which(is.na(todf$pos))
-  todf$topic[na.rows] = "-No Topic-"
+  todf$topic[na.rows] = paste0("-No ", strings$Topic,"-")
   todf$pos[na.rows] = ""
   todf$rank[na.rows] = ""
   todf$slots[na.rows] = ""
@@ -378,17 +401,17 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
 
   if (show.slots) {
     todf = select(todf, pos, topic, studname, rank, sl, studemail, slots)
-    col.names = c("","Topic","Student","Ranked as","Topic Ranks","Email", "Filled Slots")
+    col.names = c("",strings$Topic,"Student","Ranked as",paste0(strings$Topic," Ranks"),"Email", "Filled Slots")
   } else {
     todf = select(todf, pos, topic, studname, rank, sl, studemail)
-    col.names = c("","Topic","Student","Ranked as","Topic Ranks","Email")
+    col.names = c("",strings$Topic,"Student","Ranked as",paste0(strings$Topic," Ranks"),"Email")
 
   }
   tohtml = simpleTable(id="alloc-table", df=todf,wrap = TRUE, col.names = col.names, row.class = row.class,class = "simple-table")
 
   mlab = to.label(method, app$glob$sets$method)
   ui = tagList(
-    h4(paste0("Topic Allocation via ", mlab)),
+    h4(paste0("Allocation via ", mlab)),
     downloadButton("excelDownloadBtn","Download (Excel)"),
     downloadButton("wordDownloadBtn","Download (Word)"),
     #simpleButton("sendAllocEmailBtn", icon = icon("envelope"), "Results email for students..."),
@@ -397,16 +420,18 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
 
   setDownloadHandler("excelDownloadBtn",
     filename=function(app = getApp())
-      paste0("topic_allocation.xlsx"),
+      paste0(strings$topic,"_allocation.xlsx"),
     content = function(file, ...) {
       restore.point("downloadTopics")
       app=getApp()
       withProgress(message="Excel file is generated, please wait a moment...", {
         if (show.slots) {
-          alloc.df = select(todf, Pos=pos, Topic=topic, Student=studname, Email=studemail, Rank=rank, Topic_Filled_Slots=slots)
+          alloc.df = select(todf, Pos=pos, Topic=topic, Student=studname, Email=studemail, Rank=rank, Filled_Slots=slots)
+
         } else {
           alloc.df = select(todf, Pos=pos, Topic=topic, Student=studname, Email=studemail, Rank=rank)
         }
+        colnames(alloc.df)[2] = strings$Topic
         tabs = c(list(allocation=alloc.df), compute.ranking.df())
         library(writexl)
         write_xlsx(tabs, file)
@@ -417,13 +442,13 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
 
   setDownloadHandler("wordDownloadBtn",
     filename=function(app = getApp())
-      paste0("topic_allocation.docx"),
+      paste0(paste0(strings$topic,"_allocation.docx")),
     content = function(file, ...) {
       restore.point("downloadWordTopics")
       app=getApp()
       withProgress(message="Word file is generated, please wait a moment...", {
         if (show.slots) {
-          alloc.df = select(todf, Pos=pos, Topic=topic, Student=studname, Email=studemail, Rank=rank, Topic_Filled_Slots=slots)
+          alloc.df = select(todf, Pos=pos, Topic=topic, Student=studname, Email=studemail, Rank=rank, Filled_Slots=slots)
         } else {
           alloc.df = select(todf, Pos=pos, Topic=topic, Student=studname, Email=studemail, Rank=rank)
         }
@@ -439,12 +464,13 @@ allocation.info.ui = function(method = tat$method, tat=app$tat, app=getApp(), us
 
 compute.ranking.df = function(tat=app$tat,  app=getApp()) {
   restore.point("compute.ranking.df")
+  strings = app$glob$strings
 
   ras = tat$ras
   mat = ras %>% select(studemail, rank, pos) %>%
     arrange(studemail,pos) %>%
     spread(key = pos, value = rank)
-  colnames(mat)[-1] = paste0("Topic ", colnames(mat)[-1])
+  colnames(mat)[-1] = paste0(strings$Topic," ", colnames(mat)[-1])
 
   mar = ras %>% filter(!is.na(rank)) %>%
     select(studemail, rank, pos) %>%
@@ -452,7 +478,9 @@ compute.ranking.df = function(tat=app$tat,  app=getApp()) {
     spread(key = rank, value = pos)
   colnames(mar)[-1] = paste0("Rank ", colnames(mar)[-1])
 
-  list("rank_by_topic"=mat, "topic_by_rank"=mar)
+  res = list("rank_by_topic"=mat, "topic_by_rank"=mar)
+  names(res) = c(paste0("rank_by_", strings$topic),paste0(strings$topic,"_by_rank"))
+  res
 }
 
 refresh.alloc.and.ui = function(tat=app$tat, app=getApp()) {
@@ -470,6 +498,7 @@ res.questions.ui = function() {
 
 res.modify.ui = function(tat = app$tat, app=getApp()) {
   restore.point("res.modify.ui")
+  strings = app$glob$strings
 
   topics = tat$tops$topic
 
@@ -504,7 +533,7 @@ res.modify.ui = function(tat = app$tat, app=getApp()) {
       tags$td(style="padding-left: 2em;", simpleTimeInput("deadline_time", "Deadline Time", width="12em", value=tat$deadline_time))
     ),
     #simpleButton("redrawSeedBtn","Redraw priorities to change allocation under random serial dictatorship"), br(),
-    tags$b("Modify a topic's number of slots:"),
+    tags$b(paste0("Modify a ", strings$topic,"'s number of slots:")),
     HTML(slots.tab),
     br(),
     tags$b("Deactivate students or fix topics:"),
@@ -677,6 +706,7 @@ res.tab.change = function(value,...,tat=app$tat,app=getApp()) {
 
 alloc.word.report = function(out.file, alloc.df, tat = app$tat, app=getApp()) {
   restore.point("alloc.word.report")
+  strings = app$glob$strings
 
   library(officer)
   tpl.file = system.file("tpl/alloc_tpl.docx", package="taddleapp")
@@ -689,19 +719,20 @@ alloc.word.report = function(out.file, alloc.df, tat = app$tat, app=getApp()) {
 
   df = select(alloc.df, Pos, Topic, Student, Email)
   df = clear.same.prev.line(df, c("Pos","Topic"))
+  colnames(df)[2] = strings$Topic
   doc = doc %>%
-    body_add_par("Sorted by Topics", style = "heading 1") %>%
+    body_add_par(paste0("Sorted by ", strings$Topics), style = "heading 1") %>%
     body_add_par("") %>%
     body_add_table(df, style=tab_style)
   doc = doc %>%
     body_add_break() %>%
-    body_add_par("Sorted by Topics (No Email)", style = "heading 1") %>%
+    body_add_par(paste0("Sorted by ", strings$Topics," (No Email)"), style = "heading 1") %>%
     body_add_par("") %>%
     body_add_table(select(df,-Email), style=tab_style)
 
   df = select(alloc.df, Student, Email, Topic) %>% arrange(Student)
   df = filter(df, nchar(Student)>0 | nchar(Email)>0)
-
+  colnames(df)[3] = strings$Topic
   doc = doc %>%
     body_add_break() %>%
     body_add_par("Sorted by Student", style = "heading 1") %>%

@@ -1,7 +1,9 @@
 examples.taddleApp = function() {
   restore.point.options(display.restore.point=TRUE)
-  setwd("D:/libraries/taddle/")
-  app = taddleApp("D:/libraries/taddle/shared")
+  setwd("C:/libraries/taddle/")
+
+  app = taddleApp("C:/libraries/taddle/shared")
+  app = taddleApp("C:/libraries/taddle/shared", custom.ui = custom.ui)
 
   viewApp(app, url.args = list(rank="cwobzs"))
 
@@ -169,15 +171,19 @@ ranking.submit.click = function(pos=NULL, shownpos=NULL, formValues=NULL, tat=ap
   } else {
     shownpos = unlist(shownpos)
     # Check if topn topics are chosen
-    if (any(shownpos==0)) {
-      msg=paste0("You have only ranked, ", sum(shownpos>0), " topics, but you need to choose ", tat$topn, " topics.")
+    count.shown = sum(shownpos!=0)
+
+    if (tat$topn > 0 & tat$topn != count.shown) {
+      msg=paste0("You have ranked ", count.shown, " topics, but you need to choose ", tat$topn, " topics.")
       timedMessage("rankAlert", html=colored.html(msg), millis=60000)
       return()
     }
 
-    rows = match(shownpos, ra$shownpos)
     ra$rank = NA_integer_
-    ra$rank[rows] = seq_along(shownpos)
+    rows = match(shownpos, ra$shownpos)
+    rows = rows[!is.na(rows)]
+
+    ra$rank[rows] = seq_along(rows)
   }
 
   if (is.empty.val(tat$stu$studemail)) {
@@ -225,24 +231,34 @@ show.rank.ui = function(tat = app$tat, app=getApp()) {
   }
 
   use.topn = !is.empty.val(tat$topn)
-  ui = tagList(
-    h4(tat$title),
-    if (use.topn) {
-      rank.topn.table.ui()
-    } else {
-      rank.all.table.ui()
-    },
-    br(),
-    div(id="rankInfoDiv",
-      slimCollapsePanel("Info: How are the topics allocated?", value="alloc_info",HTML(glob$rank_info[[tat$org_method]]))
-    ),
-    textInput("studname", "Your name:",value=stu$studname),
-    textInput("studemail", "Email:",value=stu$studemail),
-    helpText("To submit your ranking, press the button below. You will still be able to change it afterwards."),
-    uiOutput("rankAlert"),
-    simpleButton("submitRankingBtn","Submit Ranking", form.ids = c("studname","studemail")),
-    simpleButton("delRankingBtn","Delete your Ranking")
-  )
+
+  ui.fun = app$glob$custom.ui$rank.ui.fun
+  if (is.null(ui.fun)) {
+    ui = tagList(
+      h4(tat$title),
+      if (use.topn) {
+        if (tat$topn==-1) {
+          rank.some.table.ui()
+        } else {
+          rank.topn.table.ui()
+        }
+      } else {
+        rank.all.table.ui()
+      },
+      br(),
+      div(id="rankInfoDiv",
+          slimCollapsePanel("Info: How are the topics allocated?", value="alloc_info",HTML(glob$rank_info[[tat$org_method]]))
+      ),
+      textInput("studname", "Your name:",value=stu$studname),
+      textInput("studemail", "Email:",value=stu$studemail),
+      helpText("To submit your ranking, press the button below. You will still be able to change it afterwards."),
+      uiOutput("rankAlert"),
+      simpleButton("submitRankingBtn","Submit Ranking", form.ids = c("studname","studemail")),
+      simpleButton("delRankingBtn","Delete your Ranking")
+    )
+  } else {
+    ui = ui.fun(stu=stu)
+  }
 
 
   create.rank.handlers()
@@ -339,6 +355,74 @@ rank.topn.table.ui = function(tat = app$tat, app=getApp()) {
     tags$script(src="taddle/topn_rank.js")
   )
 }
+
+# Student only ranks some topics
+# Newly introduced
+rank.some.table.ui = function(tat = app$tat, app=getApp(), table.ui.function = NULL, topic.header = "Topic") {
+  restore.point("rank.some.table.ui")
+  ra = tat$ra %>% arrange(shownpos)
+
+  n = NROW(ra)
+
+
+  rat = filter(ra, !is.na(rank)) %>%
+    arrange(rank)
+
+  upBtn = simpleButtonVector(id=paste0("upBtn-", 1:n),icon = icon("arrow-up"),extra.class = "up-btn btn-sm")
+  downBtn = simpleButtonVector(id=paste0("downBtn-", 1:n),icon = icon("arrow-down"),extra.class = "down-btn btn-sm")
+  delBtn = simpleButtonVector(id=paste0("delBtn-", 1:n),icon = icon("remove"),extra.class = "del-btn btn-sm")
+
+  upBtn[1] = ""
+  downBtn[n] = ""
+  #btns = paste0(upBtn, downBtn)
+
+  df = data_frame(rank = 1:n, topic=htmlEscape(fill.vector(rat$topic,n,"")),delBtn, upBtn, downBtn)
+  row.class = fill.vector(rep("top-filled",NROW(rat)),n,"top-empty")
+  shownpos = fill.vector(rat$shownpos,n,0)
+
+  top.tab = HTML(simpleTable(id="top-table", df, class="ra-table top-table striped-table", col.names = c("Rank",topic.header,"", "",""), row.class=row.class, row.data=list(rank = 1:n, shownpos=shownpos)))
+
+
+  n = NROW(ra)
+  row.class = ifelse(is.na(ra$rank),"unranked","ranked")
+
+  addBtn = simpleButtonVector(id=paste0("addBtn-", 1:n),icon = icon("plus","fa-sm"),extra.class = "add-btn btn-sm")
+
+  all.df = data_frame(addBtn, htmlEscape(ra$topic))
+  all.tab =  HTML(simpleTable(id="all-table", all.df, class="ra-table all-table striped-table", col.names = c("Add", topic.header), row.class=row.class, row.data=list(pos = ra$pos, shownpos=ra$shownpos)))
+
+
+  descr = paste0("Please choose your topics from the list of not chosen topics", if(!is.empty.val(tat$deadline)) paste0("  until <b>", format(tat$deadline,"%A, %B %d at %H:%M"),"</b> (Central European Time Zone)"),
+                 ". Put your more prefered topics first. You can remove a selected topic or change its rank with buttons on the right of the table. <b>Press the submit button at the bottom of the page to submit your ranking.</b>"
+  )
+
+  if (is.null(table.ui.function)) {
+    ui = tagList(
+      includeCSS(system.file("www/topn.css", package="taddleapp")),
+      HTML(descr),
+      fluidRow(
+        column(width = 4,
+               h4("Not Chosen Topics:"),
+               all.tab
+        ),
+        column(width=7,
+               h4(paste0("Chosen ", tat$topn," Topics:")),
+               div(id="top-tab-div", style=if(NROW(rat)==0) "display: none;",
+                   top.tab
+               ),
+               div(id="top-tab-empty-div", style=if(NROW(rat)>0) "display: none;",
+                   p("--- No topics selected yet ---")
+               )
+        )
+      ),
+      tags$script(src="taddle/topn_rank.js")
+    )
+  } else {
+    ui = table.ui.function(all.tab=all.tab, top.tab=top.tab, rat=rat, tat=tat)
+  }
+  ui
+}
+
 
 html.escape = function(text,attribute=FALSE) {
   if (length(text)==0) return(text)
