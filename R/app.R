@@ -15,7 +15,7 @@ taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), email.sen
 
   glob$strings = strings
   glob$single.task = single.task
-  glob$studemail.from.login = stud.email.from.login
+  glob$studemail.from.login = studemail.from.login
   glob$task.file = task.file
   glob$task = NULL
 
