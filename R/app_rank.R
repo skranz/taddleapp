@@ -51,12 +51,14 @@ get.rank.tat = function(rankkey, db=getApp()$glob$db) {
   tops = dbGet(db,"topic", list(tatid=ta$tatid))
   ta$tops = tops
   ta$stu = empty.stu(ta)
+  if (!is.null(app[["studemail"]]))
+    tat$stu$studemail = app$studemail
   ta$ra = empty.ra(ta)
   as.environment(ta)
 }
 
 
-get.stud.tat = function(studkey, db=getApp()$glob$db) {
+get.stud.tat = function(studkey, db=getApp()$glob$db, app=getApp()) {
   restore.point("get.stud.tat")
   stu = dbGet(db,"student", list(studkey=studkey))
   if (NROW(stu)==0) return(NULL)
@@ -75,6 +77,8 @@ get.stud.tat = function(studkey, db=getApp()$glob$db) {
 
   ta$tops = tops
   ta$stu = stu
+  if (is.null(app["studemail"]))
+    app$studemail = ta$stu$studemail
   as.environment(ta)
 }
 
@@ -157,10 +161,12 @@ ranking.submit.click = function(pos=NULL, shownpos=NULL, formValues=NULL, tat=ap
     return()
   }
 
-  if (is.empty.val(formValues$studemail)) {
-    msg=paste0("Your email adress is still empty.")
-    timedMessage("rankAlert", html=colored.html(msg), millis=60000)
-    return()
+  if (!isTRUE(app$glob$studemail.from.login)) {
+    if (is.empty.val(formValues$studemail)) {
+      msg=paste0("Your email adress is still empty.")
+      timedMessage("rankAlert", html=colored.html(msg), millis=60000)
+      return()
+    }
   }
 
   ra = tat$ra
@@ -186,12 +192,16 @@ ranking.submit.click = function(pos=NULL, shownpos=NULL, formValues=NULL, tat=ap
     ra$rank[rows] = seq_along(rows)
   }
 
-  if (is.empty.val(tat$stu$studemail)) {
-    tat$stu$studemail = tolower(formValues$studemail)
-  } else if (tolower(formValues$studemail) != tolower(tat$stu$studemail)) {
-    msg=paste0("Sorry, but you already specified the email address ", tat$stu$studemail,". To change your email address, you first must delete your ranking by pressing the button below.")
-    timedMessage("rankAlert", html=colored.html(msg), millis=60000)
-    return()
+  if (!isTRUE(app$glob$studemail.from.login)) {
+    if (is.empty.val(tat$stu$studemail)) {
+      tat$stu$studemail = tolower(formValues$studemail)
+    } else if (tolower(formValues$studemail) != tolower(tat$stu$studemail)) {
+      msg=paste0("Sorry, but you already specified the email address ", tat$stu$studemail,". To change your email address, you first must delete your ranking by pressing the button below.")
+      timedMessage("rankAlert", html=colored.html(msg), millis=60000)
+      return()
+    }
+  } else {
+    tat$stu$studemail = app[["studemail"]]
   }
   tat$stu$studname = formValues$studname
   tat$ra = ra
@@ -250,7 +260,8 @@ show.rank.ui = function(tat = app$tat, app=getApp()) {
           slimCollapsePanel("Info: How are the topics allocated?", value="alloc_info",HTML(glob$rank_info[[tat$org_method]]))
       ),
       textInput("studname", "Your name:",value=stu$studname),
-      textInput("studemail", "Email:",value=stu$studemail),
+      if (!isTRUE(app$stud.email.from.login))
+        textInput("studemail", "Email:",value=stu$studemail),
       helpText("To submit your ranking, press the button below. You will still be able to change it afterwards."),
       uiOutput("rankAlert"),
       simpleButton("submitRankingBtn","Submit Ranking", form.ids = c("studname","studemail")),

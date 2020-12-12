@@ -7,7 +7,7 @@ examples.taddleApp = function() {
 }
 
 
-taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), email.sender = "taddle@uni-ulm.de", smtp.server = "", ignore.methods =c("costmin_cubic"),just.methods =NULL, base.url = "http://taddle.mathematik.uni-ulm.de", app.title = "Taddle: Easily Allocate Seminar Topics", custom.ui=NULL, stud.login=NULL, admin.login=NULL, single.task=FALSE, task.file=file.path(getwd(),"taddle_task.Rds"), strings=taddle.strings(), ...) {
+taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), email.sender = "taddle@uni-ulm.de", smtp.server = "", ignore.methods =c("costmin_cubic"),just.methods =NULL, base.url = "http://taddle.mathematik.uni-ulm.de", app.title = "Taddle: Easily Allocate Seminar Topics", custom.ui=NULL, stud.login=NULL, admin.login=NULL, single.task=FALSE, task.file=file.path(getwd(),"taddle_task.Rds"), strings=taddle.strings(), studemail.from.login=FALSE, ...) {
   restore.point("taddleApp")
   app = eventsApp()
 
@@ -15,6 +15,7 @@ taddleApp = function(taddle.dir, db.dir = file.path(taddle.dir, "db"), email.sen
 
   glob$strings = strings
   glob$single.task = single.task
+  glob$studemail.from.login = stud.email.from.login
   glob$task.file = task.file
   glob$task = NULL
 

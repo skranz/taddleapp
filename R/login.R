@@ -10,7 +10,11 @@ taddle.show.login = function(app = getApp()) {
 
 }
 
-taddle.login.fun = function(..., app=getApp()) {
+taddle.login.fun = function(userid,..., app=getApp()) {
+  restore.point("taddle.login.fun")
+  if (!app$is.admin) {
+    app$studemail = userid
+  }
   show.taddle.ui()
 }
 
@@ -47,7 +51,7 @@ make.taddle.lop = function(login.args=NULL, app=getApp()) {
   login.args$container.id = "mainUI"
   login.args$login.fun = taddle.login.fun
 
-  login.args$smtp = list(from=glob$email.sender, smtp=list(host=glob$smtp.server))
+  login.args$smtp = list(from=glob$email.sender, smtp=list(host.name=glob$smtp.server))
 
   lop  = do.call(loginModule, login.args)
   lop
