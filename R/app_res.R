@@ -76,7 +76,7 @@ res.home.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
       uiOutput("deadlineUI"),
       p(paste0("The task was created on ",tat$create_time)),
       p(HTML(paste0(
-        "So far ", tat$num.sub-num.inactive, " ", if(num.inactive>0) paste0(" active and ", num.inactive, " deactivated") ," submissions for ", tat$num.topics, " ", strings$topics, if(tat$num.slots != tat$num.topics) paste0(" with a total of ", tat$num.slots, " slots."), if (!is.empty.val(tat$topn)) paste0(" Each student ranked ", tat$topn, " ",strings$topics,".")
+        "So far ", tat$num.sub-num.inactive, " ", if(num.inactive>0) paste0(" active and ", num.inactive, " deactivated") ," submissions for ", tat$num.topics, " ", strings$topics, if(tat$num.slots != tat$num.topics) paste0(" with a total of ", tat$num.slots, " slots."), if (!is.empty.val(tat$topn) & isTRUE(tat$topn>0)) paste0(" Each student ranked ", tat$topn, " ",strings$topics,".")
       )))
     )
     res.show.deadline()
@@ -91,7 +91,7 @@ res.home.ui = function(...,tat=app$tat, app=getApp(), glob=app$glob) {
     uiOutput("deadlineUI"),
     p(paste0("The task was created on ",tat$create_time)),
     p(HTML(paste0(
-      "So far ", tat$num.sub-num.inactive, " ", if(num.inactive>0) paste0(" active and ", num.inactive, " deactivated") ," submissions for ", tat$num.topics, " ",strings$topics, if(tat$num.slots != tat$num.topics) paste0(" with a total of ", tat$num.slots, " slots."), if (!is.empty.val(tat$topn)) paste0(" Each student ranked ", tat$topn, " ",strings$topics,".")
+      "So far ", tat$num.sub-num.inactive, " ", if(num.inactive>0) paste0(" active and ", num.inactive, " deactivated") ," submissions for ", tat$num.topics, " ",strings$topics, if(tat$num.slots != tat$num.topics) paste0(" with a total of ", tat$num.slots, " slots."), if (!is.empty.val(tat$topn)  & isTRUE(tat$topn>0)) paste0(" Each student ranked ", tat$topn, " ",strings$topics,".")
     ))),
     h4(paste0("Overview of allocation mechanisms: Number of students who got their n'th ranked ", strings$topic)),
     HTML(ct.ui),
