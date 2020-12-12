@@ -6,8 +6,11 @@ taddle.show.login = function(app = getApp()) {
     lop = app$glob$stud.lop
   }
   lop.login.handlers(lop)
-  show.login.ui(lop)
-
+  if ("confirm" %in% names(app$query)) {
+      show.confirm.email(lop=lop, linkid=app$query$confirm)
+  } else {
+    show.login.ui(lop)
+  }
 }
 
 taddle.login.fun = function(userid,..., app=getApp()) {
