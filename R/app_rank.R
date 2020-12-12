@@ -77,7 +77,7 @@ get.stud.tat = function(studkey, db=getApp()$glob$db, app=getApp()) {
 
   ta$tops = tops
   ta$stu = stu
-  if (is.null(app["studemail"]))
+  if (is.null(app[["studemail"]]))
     app$studemail = ta$stu$studemail
   as.environment(ta)
 }
