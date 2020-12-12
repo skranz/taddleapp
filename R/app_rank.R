@@ -260,7 +260,7 @@ show.rank.ui = function(tat = app$tat, app=getApp()) {
           slimCollapsePanel("Info: How are the topics allocated?", value="alloc_info",HTML(glob$rank_info[[tat$org_method]]))
       ),
       textInput("studname", "Your name:",value=stu$studname),
-      if (!isTRUE(app$studemail.from.login))
+      if (!isTRUE(app$glob$studemail.from.login))
         textInput("studemail", "Email:",value=stu$studemail)
       else
         tags$p("Email: ", app[["studemail"]]),
