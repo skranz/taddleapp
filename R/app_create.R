@@ -240,7 +240,7 @@ submit.new.tat = function(..., tat=app$tat, app=getApp(), glob=app$glob) {
   setUI("newSubmitAlert", ui)
 
 
-  body = paste0("Hello,\n\nyou just generated a new topic allocation task with Taddle.\nYour students can enter their ranking of topics under the following link (you can send the link to your students):\n\n",rank.url,"\n\nYou can see the results under the following link (keep that link private):\n\n",res.url,"\n\n", if(!is.empty.val(tat$deadline)) paste0(" You have set the deadline ", format(tat$deadline,"%y-%m-%d %H:%M"),".\n\n"),
+  body = paste0("Hello,\n\nyou just generated a new allocation task with Taddle.\nYour students can enter their ranking under the following link (you can send the link to your students):\n\n",rank.url,"\n\nYou can see the results under the following link (keep that link private):\n\n",res.url,"\n\n", if(!is.empty.val(tat$deadline)) paste0(" You have set the deadline ", format(tat$deadline,"%y-%m-%d %H:%M"),".\n\n"),
     "---\nThis is an automatically generated email. Please don't reply.")
 
   taddle.send.email(to=tat$email, subject = paste0("New Allocation Task: ", tat$title), body=body)
