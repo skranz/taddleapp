@@ -222,8 +222,13 @@ submit.new.tat = function(..., tat=app$tat, app=getApp(), glob=app$glob) {
 
   log.action("submit_tat", method=tat$method)
 
-  rank.url = paste0(app$glob$base.url,"?rank=", tat$rankkey)
-  res.url = paste0(app$glob$base.url,"?key=", tat$tatid)
+  if (app$glob$single.task) {
+    rank.url = paste0(app$glob$base.url)
+    res.url = paste0(app$glob$base.url,"?role=admin")
+  } else {
+    rank.url = paste0(app$glob$base.url,"?rank=", tat$rankkey)
+    res.url = paste0(app$glob$base.url,"?key=", tat$tatid)
+  }
   ui = tagList(
     h4("The allocation task has been generated"),
     p("Your students that can now enter their ranking of topics under the following link. (You can inform them via email)."),
