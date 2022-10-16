@@ -73,7 +73,10 @@ simpleTable = function(id=random.string(1), df, col.names=colnames(df), col.tool
 }
 
 fontAwesomeHeader = function() {
-  htmlDependency("font-awesome", "4.7.0", c(href = "shared/font-awesome"), stylesheet = "css/font-awesome.min.css")
+  htmlDependency("font-awesome",
+            "5.13.0", "www/shared/fontawesome", package = "shiny",
+            stylesheet = c("css/all.min.css", "css/v4-shims.min.css"))
+  #htmlDependency("font-awesome", "4.7.0", c(href = "shared/font-awesome"), stylesheet = "css/font-awesome.min.css")
 }
 
 tableSelectInputVector = function (inputId, choices, selected=1, width=NULL, value=NULL, extra.class = "", ...)  {
