@@ -148,12 +148,23 @@ about.ui = function() {
   )
 
 }
+
+
+# sendmail requires email adresses of the form "<myemail@email.com>"
+repair_email_address = function(email) {
+  rows = !startsWith(trimws(email),"<")
+  email[rows] = paste0("<", trimws(email),">")
+  email
+}
+
 taddle.send.email = function(to, subject, body,from=app$glob$email.sender, smtp.server = app$glob$smtp.server, app=getApp()) {
   restore.point("taddle.send.email")
   if (is.empty.val(smtp.server)) {
     cat("\nNo smtp server specified.")
     return()
   }
+  to = repair_email_address(to)
+  from = repair_email_address(from)
   try(sendmailR::sendmail(from=from, to=to, subject=subject, msg=sep.lines(body), control=list(smtpServer=smtp.server)))
 }
 
